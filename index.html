@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DebtPath | College Debt Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section id="landing-screen" class="screen active" aria-label="Landing page">
+        <div class="bg-shape bg-shape-a" aria-hidden="true"></div>
+        <div class="bg-shape bg-shape-b" aria-hidden="true"></div>
+        <div class="hero">
+          <p class="kicker">Debt clarity for former college students</p>
+          <h1>Track, predict, and resolve unpaid college debt.</h1>
+          <p class="hero-copy">
+            Upload documentation, analyze current debt, see how interest changes your balance,
+            and get next-step options to eliminate, mitigate, or resolve what you owe.
+          </p>
+          <button id="start-btn" class="btn btn-primary" type="button">Start Review</button>
+        </div>
+      </section>
+
+      <section id="workspace-screen" class="screen" aria-label="Debt review workspace">
+        <header class="workspace-header">
+          <h2>DebtPath Workspace</h2>
+          <button id="clear-btn" class="btn btn-ghost" type="button">Clear Information</button>
+        </header>
+
+        <section class="grid" aria-live="polite">
+          <article class="panel">
+            <h3>1. Upload Financial Records</h3>
+            <p class="muted">Supported for extraction: TXT/CSV. PDF/image uploads are accepted for record-keeping.</p>
+            <input id="file-input" type="file" multiple accept=".txt,.csv,.pdf,image/*" />
+            <p id="file-feedback" class="feedback">No files uploaded yet.</p>
+          </article>
+
+          <article class="panel">
+            <h3>2. Debt Inputs</h3>
+            <label for="debt-input">Current Debt Amount (USD)</label>
+            <input id="debt-input" type="number" min="0" step="0.01" placeholder="8500" />
+
+            <label for="interest-input">Annual Interest Rate (%)</label>
+            <input id="interest-input" type="number" min="0" step="0.01" placeholder="7.5" />
+
+            <label for="years-input">Projection Years</label>
+            <input id="years-input" type="number" min="1" max="30" value="5" />
+
+            <button id="analyze-btn" class="btn btn-primary" type="button">Analyze Debt</button>
+          </article>
+
+          <article class="panel panel-analysis">
+            <h3>3. Debt Analysis + Prediction</h3>
+            <div class="stat-grid">
+              <div>
+                <span class="stat-label">Current Debt</span>
+                <strong id="current-debt">$0.00</strong>
+              </div>
+              <div>
+                <span class="stat-label">Debt Status</span>
+                <strong id="debt-status">Awaiting data</strong>
+              </div>
+              <div>
+                <span class="stat-label">Projected Debt</span>
+                <strong id="projected-debt">$0.00</strong>
+              </div>
+              <div>
+                <span class="stat-label">Projected Increase</span>
+                <strong id="projected-increase">$0.00</strong>
+              </div>
+            </div>
+
+            <p id="analysis-summary" class="feedback">Upload a file or enter values, then click Analyze Debt.</p>
+
+            <div class="table-wrap">
+              <table id="projection-table" aria-label="Yearly debt projection table">
+                <thead>
+                  <tr>
+                    <th>Year</th>
+                    <th>Projected Total</th>
+                    <th>Growth vs Today</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>0</td>
+                    <td>$0.00</td>
+                    <td>$0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel">
+            <h3>4. Address + Resolution Options</h3>
+            <label for="address-input">Address</label>
+            <textarea id="address-input" rows="3" placeholder="Street, City, State, ZIP"></textarea>
+            <button id="options-btn" class="btn btn-secondary" type="button">Generate Resolution Options</button>
+            <ul id="options-list" class="option-list">
+              <li>Add your address and run analysis to generate options.</li>
+            </ul>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
