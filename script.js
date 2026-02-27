@@ -1,66 +1,49 @@
 const landingPanel = document.getElementById("landing");
-const dashboardPanel = document.getElementById("dashboard");
+const appPanel = document.getElementById("app");
+
 const signinForm = document.getElementById("signinForm");
 const signinMessage = document.getElementById("signinMessage");
-const signinButton = signinForm.querySelector("button[type='submit']");
-const tabButtons = [...document.querySelectorAll(".tab-btn")];
-const tabPanels = [...document.querySelectorAll(".tab-panel")];
 
-const docUpload = document.getElementById("docUpload");
-const currentDebtInput = document.getElementById("currentDebt");
+const tabs = [...document.querySelectorAll(".tab")];
+const tabContents = [...document.querySelectorAll(".tab-content")];
+
+const documentsInput = document.getElementById("documents");
+const debtAmountInput = document.getElementById("debtAmount");
 const interestRateInput = document.getElementById("interestRate");
 const startYearInput = document.getElementById("startYear");
-const stateInput = document.getElementById("state");
+
 const streetInput = document.getElementById("street");
 const cityInput = document.getElementById("city");
+const stateInput = document.getElementById("state");
 const zipInput = document.getElementById("zip");
 
 const analyzeBtn = document.getElementById("analyzeBtn");
 const clearBtn = document.getElementById("clearBtn");
-const statusText = document.getElementById("statusText");
-const breakdown = document.getElementById("breakdown");
-const predictions = document.getElementById("predictions");
-const options = document.getElementById("options");
 
-// Replace with your project's values from Supabase -> Settings -> API
-const SUPABASE_URL = "https://pavuonaxerlpukbepcqs.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-const supabaseClient =
-  window.supabase && SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY"
-    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    : null;
+const statusEl = document.getElementById("status");
+const breakdownEl = document.getElementById("breakdown");
+const predictionsEl = document.getElementById("predictions");
+const optionsEl = document.getElementById("options");
 
-tabButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const target = button.dataset.tab;
-    tabButtons.forEach((btn) => {
-      const selected = btn === button;
+tabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    const target = tab.dataset.tab;
+
+    tabs.forEach((btn) => {
+      const selected = btn === tab;
       btn.classList.toggle("active", selected);
       btn.setAttribute("aria-selected", String(selected));
     });
-    tabPanels.forEach((panel) => {
+
+    tabContents.forEach((panel) => {
       panel.classList.toggle("active", panel.id === target);
     });
   });
 });
 
-function showDashboard() {
-  landingPanel.classList.remove("active");
-  dashboardPanel.classList.add("active");
-}
-
-async function checkExistingSession() {
-  if (!supabaseClient) return;
-  const { data, error } = await supabaseClient.auth.getSession();
-  if (!error && data.session) {
-    showDashboard();
-  }
-}
-
-checkExistingSession();
-
-signinForm.addEventListener("submit", async (event) => {
+signinForm.addEventListener("submit", (event) => {
   event.preventDefault();
+
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
@@ -74,139 +57,126 @@ signinForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (!supabaseClient) {
-    signinMessage.textContent =
-      "Supabase is not configured yet. Add SUPABASE_URL and SUPABASE_ANON_KEY in script.js.";
-    return;
-  }
-
-  signinMessage.textContent = "Signing in...";
-  signinButton.disabled = true;
-
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  signinButton.disabled = false;
-
-  if (error) {
-    signinMessage.textContent = error.message || "Sign-in failed. Check your credentials and try again.";
-    return;
-  }
-
   signinMessage.textContent = "";
-  showDashboard();
+  landingPanel.classList.remove("active");
+  appPanel.classList.add("active");
 });
 
-function currency(value) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+function formatCurrency(value) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(value);
 }
 
-function generateRecommendations(stateCode, debt, hasAddress) {
-  const base = [
-    "Contact your college bursar or collections office to request a payoff statement and written settlement terms.",
-    "Ask for hardship-based payment plans with reduced monthly minimums or paused interest if available.",
-    "Request debt validation in writing if your account has moved to collections.",
+function buildOptions(stateCode, debt, hasAddress) {
+  const options = [
+    "Request a written payoff statement from the college bursar or collections office.",
+    "Ask about hardship-based repayment plans with reduced monthly minimums.",
+    "Request debt validation details if the account has been transferred to collections.",
   ];
 
-  if (debt > 10000) {
-    base.push("Consider a nonprofit credit counselor to compare settlement vs. structured repayment options.");
+  if (debt >= 10000) {
+    options.push("Review nonprofit credit counseling for settlement and repayment comparisons.");
   } else {
-    base.push("A short-term repayment sprint may reduce total interest cost if you can pay above minimums.");
+    options.push("Consider accelerated monthly payments to reduce long-term interest growth.");
   }
 
   if (hasAddress && stateCode) {
-    base.push(
-      `Check ${stateCode.toUpperCase()} state aid, legal aid, and borrower-assistance programs for education-related debt support.`
-    );
+    options.push(`Search ${stateCode.toUpperCase()} state aid and legal aid programs for education debt support.`);
   } else {
-    base.push("Add your address to receive better localized options and state-specific support programs.");
+    options.push("Add your address details to generate stronger location-based support options.");
   }
 
-  return base;
+  return options;
 }
 
 analyzeBtn.addEventListener("click", () => {
-  const debt = Number(currentDebtInput.value);
-  const rate = Number(interestRateInput.value) / 100;
+  const debt = Number(debtAmountInput.value);
+  const ratePercent = Number(interestRateInput.value);
+  const rate = ratePercent / 100;
   const startYear = Number(startYearInput.value);
-  const fileCount = docUpload.files.length;
-  const currentYear = new Date().getFullYear();
-  const yearsElapsed = startYear ? Math.max(0, currentYear - startYear) : null;
+  const uploadedFileCount = documentsInput.files.length;
 
   if (!Number.isFinite(debt) || debt <= 0) {
-    statusText.textContent = "Add a valid current debt amount to run analysis.";
-    return;
-  }
-  if (!Number.isFinite(rate) || rate < 0) {
-    statusText.textContent = "Add a valid annual interest rate.";
+    statusEl.textContent = "Enter a valid current debt amount to run analysis.";
     return;
   }
 
-  const interestPerYear = debt * rate;
-  const monthlyInterest = interestPerYear / 12;
-  const oneYearProjection = debt * (1 + rate);
-  const threeYearProjection = debt * Math.pow(1 + rate, 3);
-  const fiveYearProjection = debt * Math.pow(1 + rate, 5);
+  if (!Number.isFinite(ratePercent) || ratePercent < 0) {
+    statusEl.textContent = "Enter a valid annual interest rate.";
+    return;
+  }
 
-  const riskLevel = rate >= 0.09 ? "High growth risk" : rate >= 0.05 ? "Moderate growth risk" : "Lower growth risk";
-  const statusLine =
-    fileCount > 0
-      ? `Analysis complete from ${fileCount} uploaded file(s). Current status: ${riskLevel}.`
-      : `Analysis complete using entered values. Current status: ${riskLevel}.`;
-  statusText.textContent = statusLine;
+  const yearlyInterest = debt * rate;
+  const monthlyInterest = yearlyInterest / 12;
+  const oneYear = debt * Math.pow(1 + rate, 1);
+  const threeYears = debt * Math.pow(1 + rate, 3);
+  const fiveYears = debt * Math.pow(1 + rate, 5);
 
-  breakdown.innerHTML = "";
-  predictions.innerHTML = "";
-  options.innerHTML = "";
+  const currentYear = new Date().getFullYear();
+  const debtAge = startYear ? Math.max(0, currentYear - startYear) : null;
+
+  const debtStatus = ratePercent >= 9 ? "High growth risk" : ratePercent >= 5 ? "Moderate growth risk" : "Lower growth risk";
+  statusEl.textContent =
+    uploadedFileCount > 0
+      ? `Analysis complete from ${uploadedFileCount} uploaded file(s). Status: ${debtStatus}.`
+      : `Analysis complete from entered values. Status: ${debtStatus}.`;
+
+  breakdownEl.innerHTML = "";
+  predictionsEl.innerHTML = "";
+  optionsEl.innerHTML = "";
 
   const breakdownLines = [
-    `Current debt: ${currency(debt)}`,
-    `Estimated yearly interest: ${currency(interestPerYear)}`,
-    `Estimated monthly interest: ${currency(monthlyInterest)}`,
-    yearsElapsed !== null ? `Approximate debt age: ${yearsElapsed} year(s)` : "Debt age: Not provided",
+    `Current debt: ${formatCurrency(debt)}`,
+    `Estimated yearly interest: ${formatCurrency(yearlyInterest)}`,
+    `Estimated monthly interest: ${formatCurrency(monthlyInterest)}`,
+    debtAge !== null ? `Approximate debt age: ${debtAge} year(s)` : "Debt age: Not provided",
   ];
+
   breakdownLines.forEach((line) => {
     const p = document.createElement("p");
     p.textContent = line;
-    breakdown.appendChild(p);
+    breakdownEl.appendChild(p);
   });
 
   const predictionLines = [
-    `In 1 year: ${currency(oneYearProjection)}`,
-    `In 3 years: ${currency(threeYearProjection)}`,
-    `In 5 years: ${currency(fiveYearProjection)}`,
+    `Projected after 1 year: ${formatCurrency(oneYear)}`,
+    `Projected after 3 years: ${formatCurrency(threeYears)}`,
+    `Projected after 5 years: ${formatCurrency(fiveYears)}`,
   ];
+
   predictionLines.forEach((line) => {
     const p = document.createElement("p");
     p.textContent = line;
-    predictions.appendChild(p);
+    predictionsEl.appendChild(p);
   });
 
   const hasAddress = [streetInput.value, cityInput.value, stateInput.value, zipInput.value].some(
     (value) => value.trim() !== ""
   );
-  const recs = generateRecommendations(stateInput.value.trim(), debt, hasAddress);
-  recs.forEach((item) => {
+
+  buildOptions(stateInput.value.trim(), debt, hasAddress).forEach((item) => {
     const li = document.createElement("li");
     li.textContent = item;
-    options.appendChild(li);
+    optionsEl.appendChild(li);
   });
 });
 
 clearBtn.addEventListener("click", () => {
-  docUpload.value = "";
-  currentDebtInput.value = "";
+  documentsInput.value = "";
+  debtAmountInput.value = "";
   interestRateInput.value = "";
   startYearInput.value = "";
+
   streetInput.value = "";
   cityInput.value = "";
   stateInput.value = "";
   zipInput.value = "";
 
-  statusText.textContent = "No analysis yet.";
-  breakdown.innerHTML = "";
-  predictions.innerHTML = "";
-  options.innerHTML = "";
+  statusEl.textContent = "No analysis yet.";
+  breakdownEl.innerHTML = "";
+  predictionsEl.innerHTML = "";
+  optionsEl.innerHTML = "";
 });
