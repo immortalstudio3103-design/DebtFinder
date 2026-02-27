@@ -1,157 +1,132 @@
-HTML
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DebtFree Path | Take Control</title>
-    <style>
-        :root { --primary: #2563eb; --secondary: #10b981; --dark: #1e293b; --light: #f8fafc; }
-        body { font-family: 'Inter', sans-serif; margin: 0; background: var(--light); color: var(--dark); line-height: 1.6; }
-        header { height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%); }
-        h1 { font-size: 3rem; margin-bottom: 1rem; color: var(--primary); }
-        p { max-width: 600px; font-size: 1.2rem; color: #64748b; }
-        .cta-btn { background: var(--primary); color: white; padding: 15px 35px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 2rem; transition: transform 0.2s; }
-        .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Your Path to Debt-Free Living</h1>
-        <p>Upload your college financial records. We’ll analyze the interest, predict the future, and help you find the fastest way out.</p>
-        <a href="upload.html" class="cta-btn">Analyze My Debt</a>
-    </header>
-</body>
-</html>
-File 2: Document Upload (upload.html)
-This screen handles the data "input" phase. I've added a mock progress bar to simulate the analysis of financial documents.
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>College Debt Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <section id="landing" class="panel active">
+        <h1>College Debt Tracker</h1>
+        <p class="intro">
+          Track unpaid college debt, review status, forecast future balances, and explore ways to eliminate,
+          mitigate, or resolve debt.
+        </p>
 
-HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Records | DebtFree Path</title>
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .upload-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 500px; text-align: center; }
-        .drop-zone { border: 2px dashed #cbd5e1; padding: 40px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .drop-zone:hover { border-color: #2563eb; background: #eff6ff; }
-        .progress-container { margin-top: 20px; display: none; }
-        .bar { width: 0%; height: 8px; background: #2563eb; border-radius: 4px; transition: width 0.4s; }
-        button { background: #1e293b; color: white; border: none; padding: 12px 24px; border-radius: 6px; margin-top: 20px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div class="upload-card">
-        <h2>Upload Your Records</h2>
-        <p>Select your PDF statements or financial aid letters.</p>
-        <div class="drop-zone" onclick="simulateUpload()">
-            <p>Drag & Drop files here or <strong>Click to Browse</strong></p>
-        </div>
-        <div class="progress-container" id="progressCont">
-            <p id="statusText">Analyzing Documents...</p>
-            <div style="background: #e2e8f0; border-radius: 4px;"><div class="bar" id="progressBar"></div></div>
-        </div>
-    </div>
-
-    <script>
-        function simulateUpload() {
-            const cont = document.getElementById('progressCont');
-            const bar = document.getElementById('progressBar');
-            const status = document.getElementById('statusText');
-            cont.style.display = 'block';
-            let width = 0;
-            const interval = setInterval(() => {
-                if (width >= 100) {
-                    clearInterval(interval);
-                    status.innerText = "Analysis Complete!";
-                    setTimeout(() => window.location.href = 'dashboard.html', 800);
-                } else {
-                    width += 5;
-                    bar.style.width = width + '%';
-                }
-            }, 100);
-        }
-    </script>
-</body>
-</html>
-File 3: The Analysis Dashboard (dashboard.html)
-The most complex screen. It visualizes the current state, the "interest trap" prediction, and the resolution options.
-
-HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Debt Analysis Dashboard</title>
-    <style>
-        :root { --danger: #ef4444; --success: #10b981; --warn: #f59e0b; }
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; padding: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1000px; margin: 0 auto; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .full { grid-column: span 2; }
-        h3 { margin-top: 0; color: #475569; }
-        .big-num { font-size: 2.5rem; font-weight: bold; color: var(--danger); }
-        .prediction-box { background: #fff7ed; border-left: 4px solid var(--warn); padding: 15px; margin-top: 10px; }
-        .solution-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f1f5f9; }
-        .btn-solve { background: var(--success); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div class="grid">
-        <div class="card">
-            <h3>Current Debt Balance</h3>
-            <div class="big-num">$32,450.00</div>
-            <p>Status: <span style="color: var(--danger); font-weight:bold;">Accruing Interest</span></p>
+        <div class="tabs" role="tablist" aria-label="Landing tabs">
+          <button type="button" class="tab active" data-tab="signin" aria-selected="true">Sign In</button>
+          <button type="button" class="tab" data-tab="overview" aria-selected="false">Overview</button>
         </div>
 
-        <div class="card">
-            <h3>10-Year Prediction</h3>
-            <div class="big-num" style="color: var(--warn)">$48,120.00</div>
-            <p>If only minimum payments are made.</p>
+        <section id="signin" class="tab-content active">
+          <form id="signinForm" class="form">
+            <label>
+              Email
+              <input id="email" type="email" required placeholder="you@example.com" />
+            </label>
+            <label>
+              Password
+              <input id="password" type="password" minlength="8" required placeholder="At least 8 characters" />
+            </label>
+            <button type="submit" class="btn primary">Continue</button>
+          </form>
+          <p id="signinMessage" class="message" aria-live="polite"></p>
+        </section>
+
+        <section id="overview" class="tab-content">
+          <ul>
+            <li>Upload college debt documents for your records.</li>
+            <li>See a clear debt breakdown and current debt status.</li>
+            <li>Predict debt growth based on interest if unpaid.</li>
+            <li>Get address-based recommendations for resolution options.</li>
+          </ul>
+        </section>
+      </section>
+
+      <section id="app" class="panel">
+        <h2>Debt Analysis</h2>
+
+        <div class="grid">
+          <article class="card">
+            <h3>1) Upload and Debt Inputs</h3>
+            <label>
+              Upload College Documents
+              <input id="documents" type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,.csv" multiple />
+            </label>
+            <label>
+              Current Debt Amount ($)
+              <input id="debtAmount" type="number" min="0" step="0.01" placeholder="12500" />
+            </label>
+            <label>
+              Annual Interest Rate (%)
+              <input id="interestRate" type="number" min="0" step="0.01" placeholder="7.5" />
+            </label>
+            <label>
+              Debt Start Year
+              <input id="startYear" type="number" min="1980" max="2100" placeholder="2021" />
+            </label>
+          </article>
+
+          <article class="card">
+            <h3>2) Address for Solution Options</h3>
+            <label>
+              Street Address
+              <input id="street" type="text" placeholder="123 Main St" />
+            </label>
+            <label>
+              City
+              <input id="city" type="text" placeholder="City" />
+            </label>
+            <div class="inline-grid">
+              <label>
+                State
+                <input id="state" type="text" maxlength="2" placeholder="CA" />
+              </label>
+              <label>
+                ZIP
+                <input id="zip" type="text" maxlength="10" placeholder="90210" />
+              </label>
+            </div>
+
+            <div class="actions">
+              <button id="analyzeBtn" type="button" class="btn primary">Analyze Debt</button>
+              <button id="clearBtn" type="button" class="btn secondary">Clear Information</button>
+            </div>
+          </article>
         </div>
 
-        <div class="card full">
+        <div class="results-grid">
+          <article class="card">
+            <h3>Current Status</h3>
+            <p id="status">No analysis yet.</p>
+          </article>
+
+          <article class="card">
             <h3>Debt Breakdown</h3>
-            <table width="100%" style="border-collapse: collapse;">
-                <tr style="text-align: left; border-bottom: 2px solid #f1f5f9;">
-                    <th style="padding: 10px;">Loan Type</th>
-                    <th>Interest Rate</th>
-                    <th>Principal</th>
-                </tr>
-                <tr>
-                    <td style="padding: 10px;">Federal Subsidized</td>
-                    <td>4.5%</td>
-                    <td>$12,000</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px;">Private Loan (Sallie)</td>
-                    <td>8.2%</td>
-                    <td>$20,450</td>
-                </tr>
-            </table>
-        </div>
+            <div id="breakdown"></div>
+          </article>
 
-        <div class="card full">
-            <h3>Recommended Solutions</h3>
-            <div class="solution-item">
-                <div>
-                    <strong>Income-Driven Repayment (IDR)</strong>
-                    <br><small>Lower your monthly payment based on current earnings.</small>
-                </div>
-                <button class="btn-solve">Apply Now</button>
-            </div>
-            <div class="solution-item">
-                <div>
-                    <strong>Loan Refinancing</strong>
-                    <br><small>Target the 8.2% private loan to reduce interest to 5.1%.</small>
-                </div>
-                <button class="btn-solve" style="background: #2563eb;">Compare Rates</button>
-            </div>
+          <article class="card">
+            <h3>Future Predictions (If Unpaid)</h3>
+            <div id="predictions"></div>
+          </article>
+
+          <article class="card">
+            <h3>Resolution Options</h3>
+            <ul id="options"></ul>
+          </article>
         </div>
-    </div>
-</body>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
 </html>
