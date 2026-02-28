@@ -1,68 +1,130 @@
-const landingPanel = document.getElementById("landing");
-const appPanel = document.getElementById("app");
-
-const signinForm = document.getElementById("signinForm");
-const signinMessage = document.getElementById("signinMessage");
-
-const tabs = [...document.querySelectorAll(".tab")];
-const tabContents = [...document.querySelectorAll(".tab-content")];
-
-const documentsInput = document.getElementById("documents");
+const landing = document.getElementById("landing");
+const workspace = document.getElementById("workspace");
+const signInForm = document.getElementById("signInForm");
+const signInEmail = document.getElementById("signInEmail");
+const signInPassword = document.getElementById("signInPassword");
+const authMessage = document.getElementById("authMessage");
+const clearBtn = document.getElementById("clearBtn");
+const analyzeBtn = document.getElementById("analyzeBtn");
+const docInput = document.getElementById("docInput");
+const uploadStatus = document.getElementById("uploadStatus");
 const debtAmountInput = document.getElementById("debtAmount");
 const interestRateInput = document.getElementById("interestRate");
-const startYearInput = document.getElementById("startYear");
+const addressInput = document.getElementById("addressInput");
+const metricsGrid = document.getElementById("metricsGrid");
+const forecastOutput = document.getElementById("forecastOutput");
+const optionsOutput = document.getElementById("optionsOutput");
 
-const streetInput = document.getElementById("street");
-const cityInput = document.getElementById("city");
-const stateInput = document.getElementById("state");
-const zipInput = document.getElementById("zip");
+const state = {
+  extractedDebt: 0,
+  extractedRate: 0,
+  filesProcessed: 0,
+};
 
-const analyzeBtn = document.getElementById("analyzeBtn");
-const clearBtn = document.getElementById("clearBtn");
-
-const statusEl = document.getElementById("status");
-const breakdownEl = document.getElementById("breakdown");
-const predictionsEl = document.getElementById("predictions");
-const optionsEl = document.getElementById("options");
-
-tabs.forEach((tab) => {
-  tab.addEventListener("click", () => {
-    const target = tab.dataset.tab;
-
-    tabs.forEach((btn) => {
-      const selected = btn === tab;
-      btn.classList.toggle("active", selected);
-      btn.setAttribute("aria-selected", String(selected));
-    });
-
-    tabContents.forEach((panel) => {
-      panel.classList.toggle("active", panel.id === target);
-    });
-  });
-});
-
-signinForm.addEventListener("submit", (event) => {
+signInForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+  const email = signInEmail.value.trim();
+  const password = signInPassword.value;
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!email || !password) {
-    signinMessage.textContent = "Email and password are required.";
+  if (!emailPattern.test(email)) {
+    authMessage.textContent = "Enter a valid email address.";
     return;
   }
 
   if (password.length < 8) {
-    signinMessage.textContent = "Password must be at least 8 characters.";
+    authMessage.textContent = "Password must be at least 8 characters.";
     return;
   }
 
-  signinMessage.textContent = "";
-  landingPanel.classList.remove("active");
-  appPanel.classList.add("active");
+  authMessage.textContent = "";
+  landing.classList.remove("is-visible");
+  workspace.classList.add("is-visible");
 });
 
-function formatCurrency(value) {
+docInput.addEventListener("change", async (event) => {
+  const files = Array.from(event.target.files || []);
+  if (!files.length) {
+    state.extractedDebt = 0;
+    state.extractedRate = 0;
+    state.filesProcessed = 0;
+    uploadStatus.textContent = "No files uploaded yet.";
+    return;
+  }
+
+  const extractionResults = await Promise.all(files.map(readFileAndExtract));
+  state.filesProcessed = files.length;
+
+  const debtCandidates = extractionResults.flatMap((item) => item.debtCandidates);
+  const rateCandidates = extractionResults.flatMap((item) => item.rateCandidates);
+
+  state.extractedDebt = debtCandidates.reduce((sum, n) => sum + n, 0);
+  state.extractedRate = rateCandidates.length
+    ? rateCandidates.reduce((sum, n) => sum + n, 0) / rateCandidates.length
+    : 0;
+
+  if (!debtAmountInput.value && state.extractedDebt > 0) {
+    debtAmountInput.value = state.extractedDebt.toFixed(2);
+  }
+  if (!interestRateInput.value && state.extractedRate > 0) {
+    interestRateInput.value = state.extractedRate.toFixed(2);
+  }
+
+  uploadStatus.textContent = `Processed ${files.length} file(s). Estimated debt extracted: ${formatMoney(state.extractedDebt)}.`;
+});
+
+analyzeBtn.addEventListener("click", () => {
+  const principal = toNumber(debtAmountInput.value) || state.extractedDebt;
+  const annualRate = toNumber(interestRateInput.value) || state.extractedRate || 5.5;
+  const address = addressInput.value.trim();
+
+  if (principal <= 0) {
+    renderError("Please add a debt amount or upload documents with debt values.");
+    return;
+  }
+
+  const monthlyRate = annualRate / 100 / 12;
+  const monthlyGrowth = principal * monthlyRate;
+  const oneYearProjection = principal * Math.pow(1 + monthlyRate, 12);
+  const status = getDebtStatus(principal);
+  const forecasts = [1, 3, 5].map((years) => ({
+    years,
+    balance: principal * Math.pow(1 + monthlyRate, years * 12),
+  }));
+
+  renderMetrics({
+    principal,
+    annualRate,
+    monthlyGrowth,
+    oneYearProjection,
+    status,
+  });
+
+  renderForecast(forecasts, annualRate);
+  renderOptions(principal, annualRate, address);
+});
+
+clearBtn.addEventListener("click", () => {
+  state.extractedDebt = 0;
+  state.extractedRate = 0;
+  state.filesProcessed = 0;
+  docInput.value = "";
+  debtAmountInput.value = "";
+  interestRateInput.value = "";
+  addressInput.value = "";
+  uploadStatus.textContent = "Information cleared.";
+  metricsGrid.innerHTML = "";
+  forecastOutput.textContent = "Run analysis to see year-by-year debt projections.";
+  optionsOutput.textContent = "Add your address and run analysis to generate location-aware options.";
+});
+
+function toNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function formatMoney(value) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -70,113 +132,146 @@ function formatCurrency(value) {
   }).format(value);
 }
 
-function buildOptions(stateCode, debt, hasAddress) {
-  const options = [
-    "Request a written payoff statement from the college bursar or collections office.",
-    "Ask about hardship-based repayment plans with reduced monthly minimums.",
-    "Request debt validation details if the account has been transferred to collections.",
-  ];
-
-  if (debt >= 10000) {
-    options.push("Review nonprofit credit counseling for settlement and repayment comparisons.");
-  } else {
-    options.push("Consider accelerated monthly payments to reduce long-term interest growth.");
+function getDebtStatus(principal) {
+  if (principal < 5000) {
+    return { label: "Low impact", tone: "ok" };
   }
-
-  if (hasAddress && stateCode) {
-    options.push(`Search ${stateCode.toUpperCase()} state aid and legal aid programs for education debt support.`);
-  } else {
-    options.push("Add your address details to generate stronger location-based support options.");
+  if (principal < 20000) {
+    return { label: "Moderate pressure", tone: "warn" };
   }
-
-  return options;
+  return { label: "High risk", tone: "risk" };
 }
 
-analyzeBtn.addEventListener("click", () => {
-  const debt = Number(debtAmountInput.value);
-  const ratePercent = Number(interestRateInput.value);
-  const rate = ratePercent / 100;
-  const startYear = Number(startYearInput.value);
-  const uploadedFileCount = documentsInput.files.length;
+function renderError(message) {
+  metricsGrid.innerHTML = `<article class="metric risk"><h4>Issue</h4><p>${message}</p></article>`;
+}
 
-  if (!Number.isFinite(debt) || debt <= 0) {
-    statusEl.textContent = "Enter a valid current debt amount to run analysis.";
-    return;
-  }
+function renderMetrics({ principal, annualRate, monthlyGrowth, oneYearProjection, status }) {
+  metricsGrid.innerHTML = `
+    <article class="metric ${status.tone}">
+      <h4>Current Debt</h4>
+      <p>${formatMoney(principal)}</p>
+    </article>
+    <article class="metric ${status.tone}">
+      <h4>Debt Status</h4>
+      <p>${status.label}</p>
+    </article>
+    <article class="metric ${status.tone}">
+      <h4>Annual Interest Rate</h4>
+      <p>${annualRate.toFixed(2)}%</p>
+    </article>
+    <article class="metric ${status.tone}">
+      <h4>Estimated Monthly Growth</h4>
+      <p>${formatMoney(monthlyGrowth)}</p>
+    </article>
+    <article class="metric ${status.tone}">
+      <h4>Projected Balance (12 mo)</h4>
+      <p>${formatMoney(oneYearProjection)}</p>
+    </article>
+    <article class="metric ${status.tone}">
+      <h4>Files Analyzed</h4>
+      <p>${state.filesProcessed}</p>
+    </article>
+  `;
+}
 
-  if (!Number.isFinite(ratePercent) || ratePercent < 0) {
-    statusEl.textContent = "Enter a valid annual interest rate.";
-    return;
-  }
+function renderForecast(forecasts, annualRate) {
+  const rows = forecasts
+    .map((item) => `<tr><td>${item.years} year${item.years > 1 ? "s" : ""}</td><td>${formatMoney(item.balance)}</td></tr>`)
+    .join("");
 
-  const yearlyInterest = debt * rate;
-  const monthlyInterest = yearlyInterest / 12;
-  const oneYear = debt * Math.pow(1 + rate, 1);
-  const threeYears = debt * Math.pow(1 + rate, 3);
-  const fiveYears = debt * Math.pow(1 + rate, 5);
+  forecastOutput.innerHTML = `
+    <p>Forecast assumes no payments and ${annualRate.toFixed(2)}% annual interest, compounded monthly.</p>
+    <table>
+      <thead><tr><th>Time Horizon</th><th>Projected Balance</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
 
-  const currentYear = new Date().getFullYear();
-  const debtAge = startYear ? Math.max(0, currentYear - startYear) : null;
+function renderOptions(principal, annualRate, address) {
+  const region = extractState(address);
+  const highRate = annualRate >= 7;
+  const highDebt = principal >= 20000;
+  const stateHint = region ? `for ${region}` : "based on your profile";
 
-  const debtStatus = ratePercent >= 9 ? "High growth risk" : ratePercent >= 5 ? "Moderate growth risk" : "Lower growth risk";
-  statusEl.textContent =
-    uploadedFileCount > 0
-      ? `Analysis complete from ${uploadedFileCount} uploaded file(s). Status: ${debtStatus}.`
-      : `Analysis complete from entered values. Status: ${debtStatus}.`;
-
-  breakdownEl.innerHTML = "";
-  predictionsEl.innerHTML = "";
-  optionsEl.innerHTML = "";
-
-  const breakdownLines = [
-    `Current debt: ${formatCurrency(debt)}`,
-    `Estimated yearly interest: ${formatCurrency(yearlyInterest)}`,
-    `Estimated monthly interest: ${formatCurrency(monthlyInterest)}`,
-    debtAge !== null ? `Approximate debt age: ${debtAge} year(s)` : "Debt age: Not provided",
+  const options = [
+    `Request a full debt validation and account history from your institution ${stateHint}.`,
+    "Ask for a settlement quote and compare lump-sum versus payment-plan offers.",
+    highRate
+      ? "Prioritize refinancing or consolidation to reduce interest drag before balance growth accelerates."
+      : "Use an auto-pay plan to prevent delinquency and protect credit impact.",
+    highDebt
+      ? "Contact a nonprofit credit counselor to negotiate hardship terms and review legal protections."
+      : "Set a 12-24 month payoff plan with a fixed monthly contribution goal.",
+    region
+      ? `Search state-specific consumer protection and tuition recovery programs in ${region}.`
+      : "Add a state in your address to get more localized assistance pathways.",
   ];
 
-  breakdownLines.forEach((line) => {
-    const p = document.createElement("p");
-    p.textContent = line;
-    breakdownEl.appendChild(p);
-  });
+  optionsOutput.innerHTML = `<ul>${options.map((item) => `<li>${item}</li>`).join("")}</ul>`;
+}
 
-  const predictionLines = [
-    `Projected after 1 year: ${formatCurrency(oneYear)}`,
-    `Projected after 3 years: ${formatCurrency(threeYears)}`,
-    `Projected after 5 years: ${formatCurrency(fiveYears)}`,
+function extractState(address) {
+  if (!address) return "";
+  const stateMatch = address.match(/\b([A-Z]{2})\b/);
+  if (stateMatch) return stateMatch[1];
+
+  const spelledStates = [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware",
+    "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
+    "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
+    "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York",
+    "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island",
+    "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+    "West Virginia", "Wisconsin", "Wyoming",
   ];
 
-  predictionLines.forEach((line) => {
-    const p = document.createElement("p");
-    p.textContent = line;
-    predictionsEl.appendChild(p);
-  });
-
-  const hasAddress = [streetInput.value, cityInput.value, stateInput.value, zipInput.value].some(
-    (value) => value.trim() !== ""
+  const found = spelledStates.find((stateName) =>
+    address.toLowerCase().includes(stateName.toLowerCase())
   );
 
-  buildOptions(stateInput.value.trim(), debt, hasAddress).forEach((item) => {
-    const li = document.createElement("li");
-    li.textContent = item;
-    optionsEl.appendChild(li);
+  return found || "";
+}
+
+function readFileAndExtract(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const rawText = String(reader.result || "");
+      const debtCandidates = extractDebtValues(rawText);
+      const rateCandidates = extractInterestRates(rawText);
+      resolve({ debtCandidates, rateCandidates });
+    };
+
+    reader.onerror = () => resolve({ debtCandidates: [], rateCandidates: [] });
+    reader.readAsText(file);
   });
-});
+}
 
-clearBtn.addEventListener("click", () => {
-  documentsInput.value = "";
-  debtAmountInput.value = "";
-  interestRateInput.value = "";
-  startYearInput.value = "";
+function extractDebtValues(text) {
+  const values = [];
+  const currencyPattern = /\$?\s?(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})|\d+(?:\.\d{1,2}))/g;
+  for (const match of text.matchAll(currencyPattern)) {
+    const num = Number(match[1].replace(/,/g, ""));
+    if (Number.isFinite(num) && num >= 100 && num <= 300000) {
+      values.push(num);
+    }
+  }
 
-  streetInput.value = "";
-  cityInput.value = "";
-  stateInput.value = "";
-  zipInput.value = "";
+  const topCandidates = [...new Set(values)].sort((a, b) => b - a).slice(0, 4);
+  return topCandidates;
+}
 
-  statusEl.textContent = "No analysis yet.";
-  breakdownEl.innerHTML = "";
-  predictionsEl.innerHTML = "";
-  optionsEl.innerHTML = "";
-});
+function extractInterestRates(text) {
+  const values = [];
+  const ratePattern = /(\d{1,2}(?:\.\d{1,2})?)\s?%/g;
+  for (const match of text.matchAll(ratePattern)) {
+    const rate = Number(match[1]);
+    if (Number.isFinite(rate) && rate > 0 && rate < 35) {
+      values.push(rate);
+    }
+  }
+  return values;
+}

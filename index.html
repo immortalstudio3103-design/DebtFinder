@@ -1,132 +1,93 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>College Debt Tracker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <main class="container">
-      <section id="landing" class="panel active">
-        <h1>College Debt Tracker</h1>
-        <p class="intro">
-          Track unpaid college debt, review status, forecast future balances, and explore ways to eliminate,
-          mitigate, or resolve debt.
-        </p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DebtPath | College Debt Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient-shape shape-1"></div>
+  <div class="ambient-shape shape-2"></div>
 
-        <div class="tabs" role="tablist" aria-label="Landing tabs">
-          <button type="button" class="tab active" data-tab="signin" aria-selected="true">Sign In</button>
-          <button type="button" class="tab" data-tab="overview" aria-selected="false">Overview</button>
+  <main class="layout">
+    <section id="landing" class="panel panel-landing is-visible" aria-label="Landing page">
+      <div class="landing-shell">
+        <div>
+          <p class="eyebrow">Student Debt Intelligence</p>
+          <h1>Track your unpaid college debt and see where it is heading.</h1>
+          <p class="subtext">
+            Upload your school or billing records, review debt status in one place, and receive practical options to eliminate, mitigate, or resolve what you owe.
+          </p>
         </div>
 
-        <section id="signin" class="tab-content active">
-          <form id="signinForm" class="form">
-            <label>
-              Email
-              <input id="email" type="email" required placeholder="you@example.com" />
-            </label>
-            <label>
-              Password
-              <input id="password" type="password" minlength="8" required placeholder="At least 8 characters" />
-            </label>
-            <button type="submit" class="btn primary">Continue</button>
+        <article class="sign-in-tab" aria-label="Sign in">
+          <h3>Sign In</h3>
+          <p class="hint">Enter your email and password to continue.</p>
+          <form id="signInForm" novalidate>
+            <label for="signInEmail">Email</label>
+            <input id="signInEmail" type="email" required placeholder="name@example.com" />
+
+            <label for="signInPassword">Password</label>
+            <input id="signInPassword" type="password" required minlength="8" placeholder="At least 8 characters" />
+
+            <p id="authMessage" class="status auth-message" aria-live="polite"></p>
+            <button id="startBtn" class="btn btn-primary" type="submit">Sign In & Continue</button>
           </form>
-          <p id="signinMessage" class="message" aria-live="polite"></p>
-        </section>
+        </article>
+      </div>
+    </section>
 
-        <section id="overview" class="tab-content">
-          <ul>
-            <li>Upload college debt documents for your records.</li>
-            <li>See a clear debt breakdown and current debt status.</li>
-            <li>Predict debt growth based on interest if unpaid.</li>
-            <li>Get address-based recommendations for resolution options.</li>
-          </ul>
-        </section>
-      </section>
-
-      <section id="app" class="panel">
-        <h2>Debt Analysis</h2>
-
-        <div class="grid">
-          <article class="card">
-            <h3>1) Upload and Debt Inputs</h3>
-            <label>
-              Upload College Documents
-              <input id="documents" type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,.csv" multiple />
-            </label>
-            <label>
-              Current Debt Amount ($)
-              <input id="debtAmount" type="number" min="0" step="0.01" placeholder="12500" />
-            </label>
-            <label>
-              Annual Interest Rate (%)
-              <input id="interestRate" type="number" min="0" step="0.01" placeholder="7.5" />
-            </label>
-            <label>
-              Debt Start Year
-              <input id="startYear" type="number" min="1980" max="2100" placeholder="2021" />
-            </label>
-          </article>
-
-          <article class="card">
-            <h3>2) Address for Solution Options</h3>
-            <label>
-              Street Address
-              <input id="street" type="text" placeholder="123 Main St" />
-            </label>
-            <label>
-              City
-              <input id="city" type="text" placeholder="City" />
-            </label>
-            <div class="inline-grid">
-              <label>
-                State
-                <input id="state" type="text" maxlength="2" placeholder="CA" />
-              </label>
-              <label>
-                ZIP
-                <input id="zip" type="text" maxlength="10" placeholder="90210" />
-              </label>
-            </div>
-
-            <div class="actions">
-              <button id="analyzeBtn" type="button" class="btn primary">Analyze Debt</button>
-              <button id="clearBtn" type="button" class="btn secondary">Clear Information</button>
-            </div>
-          </article>
+    <section id="workspace" class="panel panel-workspace" aria-label="Debt analysis workspace">
+      <header class="workspace-header">
+        <div>
+          <p class="eyebrow">Your Analysis</p>
+          <h2>Debt Review Workspace</h2>
         </div>
+        <button id="clearBtn" class="btn btn-ghost" type="button">Clear Information</button>
+      </header>
 
-        <div class="results-grid">
-          <article class="card">
-            <h3>Current Status</h3>
-            <p id="status">No analysis yet.</p>
-          </article>
+      <div class="grid two">
+        <article class="card">
+          <h3>1) Upload financial records</h3>
+          <p class="hint">Accepts TXT/CSV/JSON/PDF files. PDF parsing is approximate in-browser.</p>
+          <input id="docInput" type="file" multiple />
+          <p id="uploadStatus" class="status">No files uploaded yet.</p>
+        </article>
 
-          <article class="card">
-            <h3>Debt Breakdown</h3>
-            <div id="breakdown"></div>
-          </article>
+        <article class="card">
+          <h3>2) Add debt profile</h3>
+          <label for="debtAmount">Current debt amount ($)</label>
+          <input id="debtAmount" type="number" min="0" step="0.01" placeholder="e.g. 24500" />
 
-          <article class="card">
-            <h3>Future Predictions (If Unpaid)</h3>
-            <div id="predictions"></div>
-          </article>
+          <label for="interestRate">Annual interest rate (%)</label>
+          <input id="interestRate" type="number" min="0" step="0.01" placeholder="e.g. 6.5" />
 
-          <article class="card">
-            <h3>Resolution Options</h3>
-            <ul id="options"></ul>
-          </article>
-        </div>
-      </section>
-    </main>
+          <label for="addressInput">Street, city, state, zip</label>
+          <textarea id="addressInput" rows="2" placeholder="e.g. 123 Main St, Atlanta, GA 30303"></textarea>
 
-    <script src="script.js"></script>
-  </body>
+          <button id="analyzeBtn" class="btn btn-primary" type="button">Analyze Debt</button>
+        </article>
+      </div>
+
+      <div class="grid three metrics" id="metricsGrid" aria-live="polite"></div>
+
+      <div class="grid two outputs">
+        <article class="card">
+          <h3>Debt Forecast</h3>
+          <div id="forecastOutput" class="output-block">Run analysis to see year-by-year debt projections.</div>
+        </article>
+        <article class="card">
+          <h3>Resolution Options</h3>
+          <div id="optionsOutput" class="output-block">Add your address and run analysis to generate location-aware options.</div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
 </html>
