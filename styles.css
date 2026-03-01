@@ -1,15 +1,16 @@
 :root {
-  --bg: #bfcbce;
-  --panel: rgba(255, 255, 255, 0.9);
-  --ink: #303655;
-  --muted: #4f6075;
-  --brand: #303655;
-  --brand-2: #6f90af;
-  --line: #bfcbce;
-  --ok: #2f5f57;
-  --warn: #6c5a33;
-  --risk: #7f2f4b;
-  --shadow: 0 14px 40px rgba(48, 54, 85, 0.16);
+  --bg: #0b0b14;
+  --panel: rgba(20, 20, 35, 0.78);
+  --ink: #f3f2f8;
+  --muted: #b8b3c8;
+  --brand: #804a8a;
+  --brand-2: #3a0353;
+  --accent: #f59e51;
+  --line: rgba(255, 255, 255, 0.18);
+  --ok: #99f0cd;
+  --warn: #f8d299;
+  --risk: #ff8cb1;
+  --shadow: 0 24px 60px rgba(5, 4, 16, 0.7);
 }
 
 * {
@@ -22,9 +23,10 @@ body {
   font-family: "Roboto", "Segoe UI", sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at 12% 15%, rgba(132, 167, 186, 0.45) 0, transparent 34%),
-    radial-gradient(circle at 85% 80%, rgba(111, 144, 175, 0.4) 0, transparent 30%),
-    linear-gradient(160deg, #bfcbce, #84a7ba 58%, #6f90af 100%);
+    radial-gradient(circle at 15% 10%, rgba(128, 74, 138, 0.52) 0, rgba(128, 74, 138, 0) 36%),
+    radial-gradient(circle at 86% 78%, rgba(245, 158, 81, 0.28) 0, rgba(245, 158, 81, 0) 34%),
+    radial-gradient(circle at 82% 16%, rgba(58, 3, 83, 0.72) 0, rgba(58, 3, 83, 0) 38%),
+    linear-gradient(145deg, #080811, #111124 52%, #1a0e2d 100%);
   display: flex;
   justify-content: center;
   padding: 32px 16px;
@@ -34,24 +36,24 @@ body {
   position: fixed;
   border-radius: 999px;
   pointer-events: none;
-  filter: blur(10px);
+  filter: blur(24px);
   z-index: -1;
 }
 
 .shape-1 {
-  width: 240px;
-  height: 240px;
-  background: rgba(48, 54, 85, 0.22);
-  top: 5%;
-  left: -70px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle at 35% 35%, rgba(128, 74, 138, 0.72), rgba(58, 3, 83, 0.22));
+  top: 3%;
+  left: -90px;
 }
 
 .shape-2 {
-  width: 280px;
-  height: 280px;
-  background: rgba(132, 167, 186, 0.28);
-  right: -80px;
-  bottom: -70px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle at 60% 45%, rgba(245, 158, 81, 0.45), rgba(248, 210, 153, 0.16));
+  right: -96px;
+  bottom: -88px;
 }
 
 .layout {
@@ -60,11 +62,12 @@ body {
 
 .panel {
   display: none;
-  background: var(--panel);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: linear-gradient(145deg, rgba(37, 24, 61, 0.9), rgba(10, 10, 18, 0.82));
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 24px;
   box-shadow: var(--shadow);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .panel.is-visible {
@@ -88,7 +91,7 @@ body {
   font-family: "Roboto", "Segoe UI", sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #303655;
+  color: #f8d299;
   font-size: 0.8rem;
 }
 
@@ -102,6 +105,7 @@ h1 {
   font-size: clamp(2rem, 4vw, 3.3rem);
   margin: 14px 0 10px;
   max-width: 18ch;
+  text-shadow: 0 10px 26px rgba(128, 74, 138, 0.36);
 }
 
 .subtext {
@@ -112,10 +116,11 @@ h1 {
 }
 
 .sign-in-tab {
-  background: #ffffff;
+  background: linear-gradient(155deg, rgba(128, 74, 138, 0.3), rgba(28, 15, 45, 0.88));
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 16px 35px rgba(3, 2, 10, 0.45);
 }
 
 .sign-in-tab h3 {
@@ -134,7 +139,7 @@ h1 {
   font-family: "Roboto", "Segoe UI", sans-serif;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 140ms ease, opacity 140ms ease;
+  transition: transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
 }
 
 .btn:hover {
@@ -142,12 +147,14 @@ h1 {
 }
 
 .btn-primary {
-  color: #fff;
-  background: linear-gradient(120deg, var(--brand), var(--brand-2));
+  color: #ffffff;
+  background: linear-gradient(120deg, #f8d299, #f59e51);
+  box-shadow: 0 10px 24px rgba(245, 158, 81, 0.34);
+  color: #24172e;
 }
 
 .btn-ghost {
-  background: #eef2f4;
+  background: rgba(255, 255, 255, 0.08);
   color: var(--ink);
   border: 1px solid var(--line);
 }
@@ -182,10 +189,11 @@ h1 {
 }
 
 .card {
-  background: #fff;
+  background: linear-gradient(160deg, rgba(29, 22, 42, 0.92), rgba(12, 11, 20, 0.86));
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .hint,
@@ -204,11 +212,18 @@ label {
 input,
 textarea {
   width: 100%;
-  border: 1px solid #c8cdd8;
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 10px;
   padding: 10px;
   font-size: 0.95rem;
   font-family: "Roboto", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(220, 214, 236, 0.66);
 }
 
 input:disabled,
@@ -235,7 +250,7 @@ textarea {
   border-radius: 18px;
   padding: 14px;
   border: 1px solid var(--line);
-  background: linear-gradient(160deg, #ffffff, #eef3f5);
+  background: linear-gradient(165deg, rgba(128, 74, 138, 0.24), rgba(13, 13, 23, 0.85));
 }
 
 .metric h4 {
@@ -285,7 +300,7 @@ textarea {
 .output-block th,
 .output-block td {
   text-align: left;
-  border-bottom: 1px solid #d7e0e4;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
   padding: 8px 0;
 }
 
@@ -294,6 +309,7 @@ textarea {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
