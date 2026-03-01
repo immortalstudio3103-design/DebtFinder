@@ -1,15 +1,15 @@
 :root {
-  --bg: #f7f6f1;
+  --bg: #bfcbce;
   --panel: rgba(255, 255, 255, 0.9);
-  --ink: #1d1f24;
-  --muted: #5a5e68;
-  --brand: #0f766e;
-  --brand-2: #ea580c;
-  --line: #d6d9df;
-  --ok: #166534;
-  --warn: #92400e;
-  --risk: #9f1239;
-  --shadow: 0 14px 40px rgba(32, 31, 27, 0.12);
+  --ink: #303655;
+  --muted: #4f6075;
+  --brand: #303655;
+  --brand-2: #6f90af;
+  --line: #bfcbce;
+  --ok: #2f5f57;
+  --warn: #6c5a33;
+  --risk: #7f2f4b;
+  --shadow: 0 14px 40px rgba(48, 54, 85, 0.16);
 }
 
 * {
@@ -22,9 +22,9 @@ body {
   font-family: "Roboto", "Segoe UI", sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at 12% 15%, #ffd7ab 0, transparent 34%),
-    radial-gradient(circle at 85% 80%, #b8f2e3 0, transparent 30%),
-    linear-gradient(160deg, #f7f6f1, #e8edf5 60%, #eff7ef 100%);
+    radial-gradient(circle at 12% 15%, rgba(132, 167, 186, 0.45) 0, transparent 34%),
+    radial-gradient(circle at 85% 80%, rgba(111, 144, 175, 0.4) 0, transparent 30%),
+    linear-gradient(160deg, #bfcbce, #84a7ba 58%, #6f90af 100%);
   display: flex;
   justify-content: center;
   padding: 32px 16px;
@@ -41,7 +41,7 @@ body {
 .shape-1 {
   width: 240px;
   height: 240px;
-  background: rgba(14, 165, 233, 0.2);
+  background: rgba(48, 54, 85, 0.22);
   top: 5%;
   left: -70px;
 }
@@ -49,7 +49,7 @@ body {
 .shape-2 {
   width: 280px;
   height: 280px;
-  background: rgba(249, 115, 22, 0.18);
+  background: rgba(132, 167, 186, 0.28);
   right: -80px;
   bottom: -70px;
 }
@@ -88,7 +88,7 @@ body {
   font-family: "Roboto", "Segoe UI", sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #0b5f58;
+  color: #303655;
   font-size: 0.8rem;
 }
 
@@ -143,11 +143,11 @@ h1 {
 
 .btn-primary {
   color: #fff;
-  background: linear-gradient(120deg, var(--brand), #0ea5e9);
+  background: linear-gradient(120deg, var(--brand), var(--brand-2));
 }
 
 .btn-ghost {
-  background: #fff;
+  background: #eef2f4;
   color: var(--ink);
   border: 1px solid var(--line);
 }
@@ -211,6 +211,13 @@ textarea {
   font-family: "Roboto", "Segoe UI", sans-serif;
 }
 
+input:disabled,
+textarea:disabled,
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 textarea {
   resize: vertical;
 }
@@ -228,7 +235,7 @@ textarea {
   border-radius: 18px;
   padding: 14px;
   border: 1px solid var(--line);
-  background: linear-gradient(160deg, #ffffff, #f9fafb);
+  background: linear-gradient(160deg, #ffffff, #eef3f5);
 }
 
 .metric h4 {
@@ -278,7 +285,7 @@ textarea {
 .output-block th,
 .output-block td {
   text-align: left;
-  border-bottom: 1px solid #e6e8ee;
+  border-bottom: 1px solid #d7e0e4;
   padding: 8px 0;
 }
 

@@ -60,16 +60,17 @@
 
         <article class="card">
           <h3>2) Add debt profile</h3>
+          <p id="entryLockMsg" class="status">Upload required debt documents to enable manual entry.</p>
           <label for="debtAmount">Current debt amount ($)</label>
-          <input id="debtAmount" type="number" min="0" step="0.01" placeholder="e.g. 24500" />
+          <input id="debtAmount" type="number" min="0" step="0.01" placeholder="e.g. 24500" disabled />
 
           <label for="interestRate">Annual interest rate (%)</label>
-          <input id="interestRate" type="number" min="0" step="0.01" placeholder="e.g. 6.5" />
+          <input id="interestRate" type="number" min="0" step="0.01" placeholder="e.g. 6.5" disabled />
 
           <label for="addressInput">Street, city, state, zip</label>
-          <textarea id="addressInput" rows="2" placeholder="e.g. 123 Main St, Atlanta, GA 30303"></textarea>
+          <textarea id="addressInput" rows="2" placeholder="e.g. 123 Main St, Atlanta, GA 30303" disabled></textarea>
 
-          <button id="analyzeBtn" class="btn btn-primary" type="button">Analyze Debt</button>
+          <button id="analyzeBtn" class="btn btn-primary" type="button" disabled>Analyze Debt</button>
         </article>
       </div>
 

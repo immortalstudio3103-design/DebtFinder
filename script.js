@@ -11,6 +11,7 @@ const uploadStatus = document.getElementById("uploadStatus");
 const debtAmountInput = document.getElementById("debtAmount");
 const interestRateInput = document.getElementById("interestRate");
 const addressInput = document.getElementById("addressInput");
+const entryLockMsg = document.getElementById("entryLockMsg");
 const metricsGrid = document.getElementById("metricsGrid");
 const forecastOutput = document.getElementById("forecastOutput");
 const optionsOutput = document.getElementById("optionsOutput");
@@ -20,6 +21,8 @@ const state = {
   extractedRate: 0,
   filesProcessed: 0,
 };
+
+setManualEntryEnabled(false);
 
 signInForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -49,6 +52,7 @@ docInput.addEventListener("change", async (event) => {
     state.extractedDebt = 0;
     state.extractedRate = 0;
     state.filesProcessed = 0;
+    setManualEntryEnabled(false);
     uploadStatus.textContent = "No files uploaded yet.";
     return;
   }
@@ -71,10 +75,16 @@ docInput.addEventListener("change", async (event) => {
     interestRateInput.value = state.extractedRate.toFixed(2);
   }
 
+  setManualEntryEnabled(true);
   uploadStatus.textContent = `Processed ${files.length} file(s). Estimated debt extracted: ${formatMoney(state.extractedDebt)}.`;
 });
 
 analyzeBtn.addEventListener("click", () => {
+  if (state.filesProcessed < 1) {
+    renderError("Upload required debt documents before entering or analyzing debt information.");
+    return;
+  }
+
   const principal = toNumber(debtAmountInput.value) || state.extractedDebt;
   const annualRate = toNumber(interestRateInput.value) || state.extractedRate || 5.5;
   const address = addressInput.value.trim();
@@ -113,11 +123,22 @@ clearBtn.addEventListener("click", () => {
   debtAmountInput.value = "";
   interestRateInput.value = "";
   addressInput.value = "";
+  setManualEntryEnabled(false);
   uploadStatus.textContent = "Information cleared.";
   metricsGrid.innerHTML = "";
   forecastOutput.textContent = "Run analysis to see year-by-year debt projections.";
   optionsOutput.textContent = "Add your address and run analysis to generate location-aware options.";
 });
+
+function setManualEntryEnabled(isEnabled) {
+  debtAmountInput.disabled = !isEnabled;
+  interestRateInput.disabled = !isEnabled;
+  addressInput.disabled = !isEnabled;
+  analyzeBtn.disabled = !isEnabled;
+  entryLockMsg.textContent = isEnabled
+    ? "Manual entry unlocked. You can now type debt details."
+    : "Upload required debt documents to enable manual entry.";
+}
 
 function toNumber(value) {
   const number = Number(value);
