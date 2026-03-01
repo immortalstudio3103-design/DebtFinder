@@ -86,9 +86,34 @@
           <div id="optionsOutput" class="output-block">Add your address and run analysis to generate location-aware options.</div>
         </article>
       </div>
+
+      <div class="grid two snake-section">
+        <article class="card">
+          <h3>Snake</h3>
+          <p class="hint">Arrow keys or WASD to move. Avoid walls and yourself.</p>
+          <div class="snake-meta">
+            <p id="snakeScore" class="status">Score: 0</p>
+            <p id="snakeStatus" class="status">Press any direction key to start.</p>
+          </div>
+          <div id="snakeBoard" class="snake-board" role="img" aria-label="Snake game board"></div>
+          <div class="snake-actions">
+            <button id="snakePauseBtn" class="btn btn-ghost" type="button">Pause</button>
+            <button id="snakeRestartBtn" class="btn btn-primary" type="button">Restart</button>
+          </div>
+          <div class="snake-controls" aria-label="Snake controls">
+            <button type="button" class="btn btn-ghost snake-control-btn" data-dir="up">Up</button>
+            <div class="snake-control-row">
+              <button type="button" class="btn btn-ghost snake-control-btn" data-dir="left">Left</button>
+              <button type="button" class="btn btn-ghost snake-control-btn" data-dir="down">Down</button>
+              <button type="button" class="btn btn-ghost snake-control-btn" data-dir="right">Right</button>
+            </div>
+          </div>
+        </article>
+      </div>
     </section>
   </main>
 
+  <script src="snake-logic.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
