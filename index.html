@@ -3,130 +3,161 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>College Debt Tracker</title>
+    <title>DebtPath | College Debt Tracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js" defer></script>
   </head>
   <body>
-    <main class="container">
-      <section id="landing" class="panel active">
-        <h1>College Debt Tracker</h1>
-        <p class="intro">
-          Track unpaid college debt, review status, forecast future balances, and explore ways to eliminate,
-          mitigate, or resolve debt.
-        </p>
+    <div class="bg-orb bg-orb--left" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb--right" aria-hidden="true"></div>
+    <main class="shell">
+      <section id="landingScreen" class="panel panel--active">
+        <header class="hero">
+          <p class="kicker">DebtPath</p>
+          <h1>Understand your unpaid college debt before it grows.</h1>
+          <p>
+            Upload your records, view your debt status, and get practical options to
+            eliminate, mitigate, or resolve what you owe.
+          </p>
+        </header>
 
         <div class="tabs" role="tablist" aria-label="Landing tabs">
-          <button type="button" class="tab active" data-tab="signin" aria-selected="true">Sign In</button>
-          <button type="button" class="tab" data-tab="overview" aria-selected="false">Overview</button>
+          <button class="tab is-active" data-tab-target="overviewTab" role="tab" aria-selected="true">
+            Overview
+          </button>
+          <button class="tab" data-tab-target="signinTab" role="tab" aria-selected="false">
+            Sign In Required
+          </button>
         </div>
 
-        <section id="signin" class="tab-content active">
-          <form id="signinForm" class="form">
+        <section id="overviewTab" class="tab-panel is-active" role="tabpanel">
+          <ul class="feature-list">
+            <li>Debt analysis from uploaded college financial records</li>
+            <li>Current debt status with clear breakdowns</li>
+            <li>Future debt projections with interest growth</li>
+            <li>Location-based recommendations for resolution options</li>
+          </ul>
+        </section>
+
+        <section id="signinTab" class="tab-panel" role="tabpanel" aria-hidden="true">
+          <form id="signInForm" class="stack">
             <label>
               Email
               <input id="email" type="email" required placeholder="you@example.com" />
             </label>
             <label>
               Password
-              <input id="password" type="password" minlength="8" required placeholder="At least 8 characters" />
+              <input id="password" type="password" minlength="8" required placeholder="Minimum 8 characters" />
             </label>
-            <button type="submit" class="btn primary">Continue</button>
+            <label>
+              Supabase Anon Key
+              <input
+                id="supabaseAnonKey"
+                type="password"
+                required
+                placeholder="Paste your Supabase anon public key"
+              />
+            </label>
+            <button type="submit" class="btn btn--primary">Continue to Debt Workspace</button>
+            <p id="authMessage" class="hint" aria-live="polite"></p>
           </form>
-          <p id="signinMessage" class="message" aria-live="polite"></p>
-        </section>
-
-        <section id="overview" class="tab-content">
-          <ul>
-            <li>Upload college debt documents for your records.</li>
-            <li>See a clear debt breakdown and current debt status.</li>
-            <li>Predict debt growth based on interest if unpaid.</li>
-            <li>Get address-based recommendations for resolution options.</li>
-          </ul>
         </section>
       </section>
 
-      <section id="app" class="panel">
-        <h2>Debt Analysis</h2>
+      <section id="workspaceScreen" class="panel">
+        <header class="workspace-head">
+          <h2>Your Debt Workspace</h2>
+          <p>Upload records, add your information, run analysis, and review your options.</p>
+          <p id="dbStatus" class="hint">Database status: not connected.</p>
+        </header>
 
-        <div class="grid">
-          <article class="card">
-            <h3>1) Upload and Debt Inputs</h3>
-            <label>
-              Upload College Documents
-              <input id="documents" type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,.csv" multiple />
-            </label>
-            <label>
-              Current Debt Amount ($)
-              <input id="debtAmount" type="number" min="0" step="0.01" placeholder="12500" />
-            </label>
-            <label>
-              Annual Interest Rate (%)
-              <input id="interestRate" type="number" min="0" step="0.01" placeholder="7.5" />
-            </label>
-            <label>
-              Debt Start Year
-              <input id="startYear" type="number" min="1980" max="2100" placeholder="2021" />
-            </label>
-          </article>
+        <form id="debtForm" class="grid">
+          <div class="card">
+            <h3>1) Upload Documents</h3>
+            <p class="hint">Best results with text-based files (.txt or .csv).</p>
+            <input id="records" type="file" accept=".txt,.csv,.pdf,.doc,.docx" multiple />
+          </div>
 
-          <article class="card">
-            <h3>2) Address for Solution Options</h3>
+          <div class="card">
+            <h3>2) Debt Inputs</h3>
             <label>
-              Street Address
+              Current debt amount ($)
+              <input id="currentDebt" type="number" min="0" step="0.01" placeholder="e.g. 18500" />
+            </label>
+            <label>
+              Annual interest rate (%)
+              <input id="interestRate" type="number" min="0" step="0.01" placeholder="e.g. 7.5" />
+            </label>
+            <label>
+              Months past due
+              <input id="monthsPastDue" type="number" min="0" step="1" placeholder="e.g. 4" />
+            </label>
+          </div>
+
+          <div class="card">
+            <h3>3) Address</h3>
+            <label>
+              Street
               <input id="street" type="text" placeholder="123 Main St" />
             </label>
             <label>
               City
-              <input id="city" type="text" placeholder="City" />
+              <input id="city" type="text" placeholder="Your city" />
             </label>
-            <div class="inline-grid">
-              <label>
-                State
-                <input id="state" type="text" maxlength="2" placeholder="CA" />
-              </label>
-              <label>
-                ZIP
-                <input id="zip" type="text" maxlength="10" placeholder="90210" />
-              </label>
-            </div>
+            <label>
+              State (2-letter code)
+              <input id="state" type="text" maxlength="2" placeholder="NY" />
+            </label>
+            <label>
+              ZIP
+              <input id="zip" type="text" maxlength="10" placeholder="10001" />
+            </label>
+          </div>
 
-            <div class="actions">
-              <button id="analyzeBtn" type="button" class="btn primary">Analyze Debt</button>
-              <button id="clearBtn" type="button" class="btn secondary">Clear Information</button>
-            </div>
-          </article>
-        </div>
+          <div class="actions">
+            <button type="submit" class="btn btn--primary">Analyze Debt</button>
+            <button id="clearButton" type="button" class="btn btn--ghost">Clear Information</button>
+          </div>
+        </form>
 
-        <div class="results-grid">
-          <article class="card">
+        <section id="results" class="results" aria-live="polite">
+          <article class="result-card">
             <h3>Current Status</h3>
-            <p id="status">No analysis yet.</p>
+            <p id="statusText">Run analysis to view debt status.</p>
           </article>
 
-          <article class="card">
+          <article class="result-card">
             <h3>Debt Breakdown</h3>
-            <div id="breakdown"></div>
+            <p id="breakdownText">No analysis yet.</p>
           </article>
 
-          <article class="card">
-            <h3>Future Predictions (If Unpaid)</h3>
-            <div id="predictions"></div>
+          <article class="result-card">
+            <h3>Future Projection</h3>
+            <p id="projectionText">No projection yet.</p>
           </article>
 
-          <article class="card">
+          <article class="result-card">
             <h3>Resolution Options</h3>
-            <ul id="options"></ul>
+            <ul id="optionsList" class="option-list">
+              <li>Add your data and run analysis to generate options.</li>
+            </ul>
           </article>
-        </div>
+        </section>
+
+        <section class="history">
+          <h3>Saved Records (from Supabase)</h3>
+          <ul id="historyList" class="option-list">
+            <li>No records loaded yet.</li>
+          </ul>
+        </section>
       </section>
     </main>
-
-    <script src="script.js"></script>
   </body>
 </html>
