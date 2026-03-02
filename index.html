@@ -7,16 +7,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=IBM+Plex+Serif:wght@500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js" defer></script>
   </head>
   <body>
-    <div class="bg-orb bg-orb--left" aria-hidden="true"></div>
-    <div class="bg-orb bg-orb--right" aria-hidden="true"></div>
     <main class="shell">
       <section id="landingScreen" class="panel panel--active">
         <header class="hero">
@@ -56,15 +53,6 @@
               Password
               <input id="password" type="password" minlength="8" required placeholder="Minimum 8 characters" />
             </label>
-            <label>
-              Supabase Anon Key
-              <input
-                id="supabaseAnonKey"
-                type="password"
-                required
-                placeholder="Paste your Supabase anon public key"
-              />
-            </label>
             <button type="submit" class="btn btn--primary">Continue to Debt Workspace</button>
             <p id="authMessage" class="hint" aria-live="polite"></p>
           </form>
@@ -75,7 +63,6 @@
         <header class="workspace-head">
           <h2>Your Debt Workspace</h2>
           <p>Upload records, add your information, run analysis, and review your options.</p>
-          <p id="dbStatus" class="hint">Database status: not connected.</p>
         </header>
 
         <form id="debtForm" class="grid">
@@ -149,13 +136,6 @@
               <li>Add your data and run analysis to generate options.</li>
             </ul>
           </article>
-        </section>
-
-        <section class="history">
-          <h3>Saved Records (from Supabase)</h3>
-          <ul id="historyList" class="option-list">
-            <li>No records loaded yet.</li>
-          </ul>
         </section>
       </section>
     </main>

@@ -1,10 +1,7 @@
-const SUPABASE_URL = "https://pavuonaxerlpukbepcqs.supabase.co";
-
 const landingScreen = document.getElementById("landingScreen");
 const workspaceScreen = document.getElementById("workspaceScreen");
 const signInForm = document.getElementById("signInForm");
 const authMessage = document.getElementById("authMessage");
-const dbStatus = document.getElementById("dbStatus");
 const debtForm = document.getElementById("debtForm");
 const clearButton = document.getElementById("clearButton");
 
@@ -12,47 +9,24 @@ const statusText = document.getElementById("statusText");
 const breakdownText = document.getElementById("breakdownText");
 const projectionText = document.getElementById("projectionText");
 const optionsList = document.getElementById("optionsList");
-const historyList = document.getElementById("historyList");
-
-let signedInEmail = "";
-let supabase = null;
 
 setupTabs();
 
-signInForm.addEventListener("submit", async (event) => {
+signInForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const email = document.getElementById("email").value.trim().toLowerCase();
+  const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-  const anonKey = document.getElementById("supabaseAnonKey").value.trim();
 
   if (!isValidEmail(email) || password.length < 8) {
-    showAuthError("Enter a valid email and a password with at least 8 characters.");
+    authMessage.classList.add("error");
+    authMessage.textContent = "Enter a valid email and a password with at least 8 characters.";
     return;
   }
-
-  if (!anonKey) {
-    showAuthError("Enter your Supabase anon key to connect your website to the database.");
-    return;
-  }
-
-  const supabaseClientLib = window.supabase;
-  if (!supabaseClientLib || !supabaseClientLib.createClient) {
-    showAuthError("Supabase client failed to load. Check your internet connection and reload.");
-    return;
-  }
-
-  supabase = supabaseClientLib.createClient(SUPABASE_URL, anonKey);
-  signedInEmail = email;
-
-  const connected = await testSupabaseConnection();
-  if (!connected) return;
 
   authMessage.classList.remove("error");
   authMessage.textContent = "";
   landingScreen.classList.remove("panel--active");
   workspaceScreen.classList.add("panel--active");
-
-  await loadSavedHistory();
 });
 
 debtForm.addEventListener("submit", async (event) => {
@@ -67,14 +41,14 @@ debtForm.addEventListener("submit", async (event) => {
   const monthsPastDueInput = Number(document.getElementById("monthsPastDue").value);
 
   const debt = normalizeNumber(currentDebtInput, extracted.principal);
-  const annualRate = normalizeNumber(interestRateInput, extracted.rate, 0);
+  const annualRate = normalizeNumber(interestRateInput, extracted.rate);
   const monthsPastDue = Number.isFinite(monthsPastDueInput) ? monthsPastDueInput : 0;
 
   if (!Number.isFinite(debt) || debt <= 0) {
-    statusText.textContent = "Add a debt amount manually or upload a text file with amount details.";
+    statusText.textContent = "Add a debt amount manually or upload a text-based document with amount details.";
     breakdownText.textContent = "No valid debt amount available.";
     projectionText.textContent = "No projection generated.";
-    renderOptions(["Provide a debt amount to generate recommendations."]);
+    optionsList.innerHTML = "<li>Provide a debt amount to generate recommendations.</li>";
     return;
   }
 
@@ -82,11 +56,6 @@ debtForm.addEventListener("submit", async (event) => {
   const oneYear = futureDebt(debt, annualRate, 12);
   const threeYear = futureDebt(debt, annualRate, 36);
   const fiveYear = futureDebt(debt, annualRate, 60);
-
-  const street = document.getElementById("street").value.trim();
-  const city = document.getElementById("city").value.trim();
-  const state = document.getElementById("state").value.trim().toUpperCase();
-  const zip = document.getElementById("zip").value.trim();
 
   statusText.textContent = `${status.label}: ${status.summary}`;
   breakdownText.textContent = `Current debt: ${formatCurrency(debt)}. Annual interest: ${annualRate.toFixed(
@@ -96,38 +65,10 @@ debtForm.addEventListener("submit", async (event) => {
     oneYear
   )} in 1 year, ${formatCurrency(threeYear)} in 3 years, and ${formatCurrency(fiveYear)} in 5 years.`;
 
+  const state = document.getElementById("state").value.trim().toUpperCase();
+  const city = document.getElementById("city").value.trim();
   const options = buildResolutionOptions({ debt, status: status.label, state, city, annualRate });
-  renderOptions(options);
-
-  if (!supabase || !signedInEmail) {
-    dbStatus.textContent = "Database status: not connected. Sign in again to save records.";
-    return;
-  }
-
-  const payload = {
-    user_email: signedInEmail,
-    current_debt: debt,
-    annual_rate: annualRate,
-    months_past_due: monthsPastDue,
-    debt_status: status.label,
-    projection_1y: oneYear,
-    projection_3y: threeYear,
-    projection_5y: fiveYear,
-    street,
-    city,
-    state,
-    zip,
-    uploaded_excerpt: documentText.slice(0, 1000),
-  };
-
-  const { error } = await supabase.from("debt_records").insert(payload);
-  if (error) {
-    dbStatus.textContent = `Database status: save failed (${error.message}).`;
-    return;
-  }
-
-  dbStatus.textContent = "Database status: connected and latest record saved.";
-  await loadSavedHistory();
+  optionsList.innerHTML = options.map((item) => `<li>${item}</li>`).join("");
 });
 
 clearButton.addEventListener("click", () => {
@@ -135,7 +76,7 @@ clearButton.addEventListener("click", () => {
   statusText.textContent = "Run analysis to view debt status.";
   breakdownText.textContent = "No analysis yet.";
   projectionText.textContent = "No projection yet.";
-  renderOptions(["Add your data and run analysis to generate options."]);
+  optionsList.innerHTML = "<li>Add your data and run analysis to generate options.</li>";
 });
 
 function setupTabs() {
@@ -156,72 +97,10 @@ function setupTabs() {
 
       button.classList.add("is-active");
       button.setAttribute("aria-selected", "true");
-
       const activePanel = document.getElementById(target);
       activePanel.classList.add("is-active");
       activePanel.setAttribute("aria-hidden", "false");
     });
-  });
-}
-
-async function testSupabaseConnection() {
-  const { error } = await supabase.from("debt_records").select("id").limit(1);
-  if (error) {
-    showAuthError(`Supabase connection failed: ${error.message}`);
-    dbStatus.textContent = "Database status: connection failed.";
-    return false;
-  }
-
-  authMessage.classList.remove("error");
-  dbStatus.textContent = "Database status: connected.";
-  return true;
-}
-
-async function loadSavedHistory() {
-  const { data, error } = await supabase
-    .from("debt_records")
-    .select("created_at,current_debt,debt_status,state")
-    .eq("user_email", signedInEmail)
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  if (error) {
-    historyList.innerHTML = "";
-    const item = document.createElement("li");
-    item.textContent = `Could not load history: ${error.message}`;
-    historyList.appendChild(item);
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    historyList.innerHTML = "";
-    const item = document.createElement("li");
-    item.textContent = "No saved records yet.";
-    historyList.appendChild(item);
-    return;
-  }
-
-  historyList.innerHTML = "";
-  data.forEach((row) => {
-    const item = document.createElement("li");
-    const when = row.created_at ? new Date(row.created_at).toLocaleString() : "Unknown time";
-    const state = row.state || "n/a";
-    item.textContent = `${when} | ${formatCurrency(row.current_debt)} | ${row.debt_status} | ${state}`;
-    historyList.appendChild(item);
-  });
-}
-
-function showAuthError(message) {
-  authMessage.classList.add("error");
-  authMessage.textContent = message;
-}
-
-function renderOptions(items) {
-  optionsList.innerHTML = "";
-  items.forEach((text) => {
-    const li = document.createElement("li");
-    li.textContent = text;
-    optionsList.appendChild(li);
   });
 }
 
@@ -231,7 +110,8 @@ function isValidEmail(email) {
 
 async function readSupportedFiles(files) {
   const textFiles = files.filter((file) => /\.(txt|csv)$/i.test(file.name));
-  const chunks = await Promise.all(textFiles.map((file) => file.text().catch(() => "")));
+  const reads = textFiles.map((file) => file.text().catch(() => ""));
+  const chunks = await Promise.all(reads);
   return chunks.join("\n");
 }
 
@@ -251,10 +131,10 @@ function extractDebtSignals(text) {
   };
 }
 
-function normalizeNumber(primary, fallback, defaultValue = NaN) {
-  if (Number.isFinite(primary) && primary >= 0) return primary;
-  if (Number.isFinite(fallback) && fallback >= 0) return fallback;
-  return defaultValue;
+function normalizeNumber(primary, fallback) {
+  if (Number.isFinite(primary) && primary > 0) return primary;
+  if (Number.isFinite(fallback) && fallback > 0) return fallback;
+  return NaN;
 }
 
 function classifyDebtStatus(debt, monthsPastDue) {
@@ -309,7 +189,7 @@ function buildResolutionOptions({ debt, status, state, city, annualRate }) {
     options.push(`Check legal-aid or financial empowerment offices near ${city} for debt negotiation resources.`);
   }
 
-  options.push("Keep all communication in writing and store payment or settlement confirmations.");
+  options.push("Keep all communication in writing and store payment/settlement confirmations.");
   return options;
 }
 
@@ -318,5 +198,5 @@ function formatCurrency(value) {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 2,
-  }).format(value || 0);
+  }).format(value);
 }
