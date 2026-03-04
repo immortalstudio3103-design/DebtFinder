@@ -1,163 +1,136 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DebtPath | College Debt Tracker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js" defer></script>
-  </head>
-  <body>
-    <div class="bg-orb bg-orb--left" aria-hidden="true"></div>
-    <div class="bg-orb bg-orb--right" aria-hidden="true"></div>
-    <main class="shell">
-      <section id="landingScreen" class="panel panel--active">
-        <header class="hero">
-          <p class="kicker">DebtPath</p>
-          <h1>Understand your unpaid college debt before it grows.</h1>
-          <p>
-            Upload your records, view your debt status, and get practical options to
-            eliminate, mitigate, or resolve what you owe.
-          </p>
-        </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus Debt Navigator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-shape bg-shape-one" aria-hidden="true"></div>
+  <div class="bg-shape bg-shape-two" aria-hidden="true"></div>
 
-        <div class="tabs" role="tablist" aria-label="Landing tabs">
-          <button class="tab is-active" data-tab-target="overviewTab" role="tab" aria-selected="true">
-            Overview
-          </button>
-          <button class="tab" data-tab-target="signinTab" role="tab" aria-selected="false">
-            Sign In Required
-          </button>
+  <main class="app-shell">
+    <section class="card hero-card" id="landingView" aria-label="Landing page">
+      <div class="hero-copy">
+        <p class="eyebrow">Human-Centered Debt Recovery Tool</p>
+        <h1>Campus Debt Navigator</h1>
+        <p>
+          Track unpaid college debt, understand your status now, and predict future balances so
+          you can choose the right resolution path with confidence.
+        </p>
+      </div>
+
+      <div class="auth-panel" role="tablist" aria-label="Sign in tabs">
+        <div class="tab-controls">
+          <button class="tab-btn active" id="signInTab" role="tab" aria-selected="true" aria-controls="signInPanel">Sign In Required</button>
         </div>
 
-        <section id="overviewTab" class="tab-panel is-active" role="tabpanel">
-          <ul class="feature-list">
-            <li>Debt analysis from uploaded college financial records</li>
-            <li>Current debt status with clear breakdowns</li>
-            <li>Future debt projections with interest growth</li>
-            <li>Location-based recommendations for resolution options</li>
-          </ul>
-        </section>
+        <div class="tab-panel" id="signInPanel" role="tabpanel" aria-labelledby="signInTab">
+          <form id="loginForm" novalidate>
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required placeholder="you@example.com" />
 
-        <section id="signinTab" class="tab-panel" role="tabpanel" aria-hidden="true">
-          <form id="signInForm" class="stack">
-            <label>
-              Email
-              <input id="email" type="email" required placeholder="you@example.com" />
-            </label>
-            <label>
-              Password
-              <input id="password" type="password" minlength="8" required placeholder="Minimum 8 characters" />
-            </label>
-            <label>
-              Supabase Anon Key
-              <input
-                id="supabaseAnonKey"
-                type="password"
-                required
-                placeholder="Paste your Supabase anon public key"
-              />
-            </label>
-            <button type="submit" class="btn btn--primary">Continue to Debt Workspace</button>
-            <p id="authMessage" class="hint" aria-live="polite"></p>
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required minlength="6" placeholder="Minimum 6 characters" />
+
+            <button type="submit" class="btn-primary">Continue</button>
+            <p class="form-hint" id="loginMessage" aria-live="polite"></p>
           </form>
-        </section>
-      </section>
+        </div>
+      </div>
+    </section>
 
-      <section id="workspaceScreen" class="panel">
-        <header class="workspace-head">
-          <h2>Your Debt Workspace</h2>
-          <p>Upload records, add your information, run analysis, and review your options.</p>
-          <p id="dbStatus" class="hint">Database status: not connected.</p>
-        </header>
+    <section class="card hidden" id="dashboardView" aria-label="Debt analysis dashboard">
+      <header class="dashboard-header">
+        <h2>Debt Analysis Workspace</h2>
+        <p>Upload college debt records, then review breakdown, status, predictions, and next steps.</p>
+      </header>
 
-        <form id="debtForm" class="grid">
-          <div class="card">
-            <h3>1) Upload Documents</h3>
-            <p class="hint">Best results with text-based files (.txt or .csv).</p>
-            <input id="records" type="file" accept=".txt,.csv,.pdf,.doc,.docx" multiple />
+      <form id="debtForm" class="debt-form" novalidate>
+        <div class="grid-two">
+          <div>
+            <label for="fileUpload">Upload College Documentation</label>
+            <input id="fileUpload" name="fileUpload" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.csv,.txt" />
+            <small>Accepted for testing: PDF, DOC/DOCX, image, CSV, TXT.</small>
           </div>
 
-          <div class="card">
-            <h3>2) Debt Inputs</h3>
-            <label>
-              Current debt amount ($)
-              <input id="currentDebt" type="number" min="0" step="0.01" placeholder="e.g. 18500" />
-            </label>
-            <label>
-              Annual interest rate (%)
-              <input id="interestRate" type="number" min="0" step="0.01" placeholder="e.g. 7.5" />
-            </label>
-            <label>
-              Months past due
-              <input id="monthsPastDue" type="number" min="0" step="1" placeholder="e.g. 4" />
-            </label>
+          <div>
+            <label for="address">Address</label>
+            <input id="address" name="address" type="text" placeholder="Street, City, State, ZIP" required />
+            <small>Used to suggest region-aware resolution options.</small>
+          </div>
+        </div>
+
+        <div class="grid-three">
+          <div>
+            <label for="principal">Current Debt Amount ($)</label>
+            <input id="principal" name="principal" type="number" min="0" step="0.01" placeholder="12500" required />
           </div>
 
-          <div class="card">
-            <h3>3) Address</h3>
-            <label>
-              Street
-              <input id="street" type="text" placeholder="123 Main St" />
-            </label>
-            <label>
-              City
-              <input id="city" type="text" placeholder="Your city" />
-            </label>
-            <label>
-              State (2-letter code)
-              <input id="state" type="text" maxlength="2" placeholder="NY" />
-            </label>
-            <label>
-              ZIP
-              <input id="zip" type="text" maxlength="10" placeholder="10001" />
-            </label>
+          <div>
+            <label for="interestRate">Annual Interest Rate (%)</label>
+            <input id="interestRate" name="interestRate" type="number" min="0" step="0.01" placeholder="6.5" required />
           </div>
 
-          <div class="actions">
-            <button type="submit" class="btn btn--primary">Analyze Debt</button>
-            <button id="clearButton" type="button" class="btn btn--ghost">Clear Information</button>
+          <div>
+            <label for="monthsLate">Months Unpaid</label>
+            <input id="monthsLate" name="monthsLate" type="number" min="0" step="1" placeholder="10" required />
           </div>
-        </form>
+        </div>
 
-        <section id="results" class="results" aria-live="polite">
-          <article class="result-card">
-            <h3>Current Status</h3>
-            <p id="statusText">Run analysis to view debt status.</p>
-          </article>
+        <div class="actions-row">
+          <button type="submit" class="btn-primary">Analyze Debt</button>
+          <button type="button" id="loadRecordsBtn" class="btn-secondary">Load Saved Records</button>
+          <button type="button" id="clearBtn" class="btn-secondary">Clear Information</button>
+        </div>
+        <p class="sync-message" id="syncMessage" aria-live="polite"></p>
+      </form>
 
-          <article class="result-card">
-            <h3>Debt Breakdown</h3>
-            <p id="breakdownText">No analysis yet.</p>
-          </article>
-
-          <article class="result-card">
-            <h3>Future Projection</h3>
-            <p id="projectionText">No projection yet.</p>
-          </article>
-
-          <article class="result-card">
-            <h3>Resolution Options</h3>
-            <ul id="optionsList" class="option-list">
-              <li>Add your data and run analysis to generate options.</li>
-            </ul>
-          </article>
-        </section>
-
-        <section class="history">
-          <h3>Saved Records (from Supabase)</h3>
-          <ul id="historyList" class="option-list">
-            <li>No records loaded yet.</li>
+      <section class="results hidden" id="results" aria-live="polite">
+        <article class="result-card">
+          <h3>Debt Breakdown</h3>
+          <ul>
+            <li><span>Uploaded File</span><strong id="fileNameResult">None</strong></li>
+            <li><span>Principal</span><strong id="principalResult">$0.00</strong></li>
+            <li><span>Estimated Accrued Interest</span><strong id="interestResult">$0.00</strong></li>
+            <li><span>Total Estimated Debt</span><strong id="totalResult">$0.00</strong></li>
           </ul>
-        </section>
+        </article>
+
+        <article class="result-card">
+          <h3>Current Status</h3>
+          <p id="statusResult">No analysis yet.</p>
+        </article>
+
+        <article class="result-card">
+          <h3>Future Debt Prediction</h3>
+          <ul>
+            <li><span>In 6 months</span><strong id="sixMonthResult">$0.00</strong></li>
+            <li><span>In 12 months</span><strong id="twelveMonthResult">$0.00</strong></li>
+            <li><span>In 24 months</span><strong id="twentyFourMonthResult">$0.00</strong></li>
+          </ul>
+        </article>
+
+        <article class="result-card full-width">
+          <h3>Resolution Options</h3>
+          <p id="locationSummary"></p>
+          <ul id="optionsList"></ul>
+        </article>
+
+        <article class="result-card full-width">
+          <h3>Saved Debt Records</h3>
+          <p id="recordsSummary">Click "Load Saved Records" to read entries from Supabase.</p>
+          <ul id="savedRecordsList"></ul>
+        </article>
       </section>
-    </main>
-  </body>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
+</body>
 </html>
