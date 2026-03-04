@@ -125,6 +125,32 @@ h1 {
   background: linear-gradient(165deg, rgba(31, 138, 122, 0.1), rgba(216, 155, 59, 0.08));
 }
 
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+
+.auth-tab.is-active {
+  background: linear-gradient(130deg, var(--teal), var(--teal-deep));
+  color: #f8fffd;
+  border-color: transparent;
+}
+
+.auth-pane {
+  display: none;
+}
+
+.auth-pane.is-active {
+  display: block;
+}
+
+.auth-submit {
+  margin-top: 12px;
+  width: 100%;
+}
+
 
 .btn {
   border: 0;
@@ -246,6 +272,19 @@ textarea {
   height: 10px;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--gold), #b37a24);
+}
+
+.bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(17, 34, 45, 0.12);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--teal), var(--gold));
 }
 
 .table {

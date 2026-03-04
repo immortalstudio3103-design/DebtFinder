@@ -5,8 +5,17 @@ const SUPABASE_TABLE = "debt_analysis_records";
 const landingScreen = document.getElementById("landingScreen");
 const workspaceScreen = document.getElementById("workspaceScreen");
 
-const authEmailInput = document.getElementById("authEmail");
-const authPasswordInput = document.getElementById("authPassword");
+const authTabSignIn = document.getElementById("authTabSignIn");
+const authTabSignUp = document.getElementById("authTabSignUp");
+const signInPane = document.getElementById("signInPane");
+const signUpPane = document.getElementById("signUpPane");
+
+const signInEmailInput = document.getElementById("signInEmail");
+const signInPasswordInput = document.getElementById("signInPassword");
+const signUpEmailInput = document.getElementById("signUpEmail");
+const signUpPasswordInput = document.getElementById("signUpPassword");
+const signUpConfirmPasswordInput = document.getElementById("signUpConfirmPassword");
+
 const signInButton = document.getElementById("signInButton");
 const signUpButton = document.getElementById("signUpButton");
 const signOutButton = document.getElementById("signOutButton");
@@ -41,51 +50,177 @@ const appState = {
   currentUser: null,
 };
 
-const supabaseClient = window.supabase?.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const supabaseClient = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY) || null;
 
-initAuth();
+init();
 
-signInButton.addEventListener("click", async () => {
-  const email = authEmailInput.value.trim();
-  const password = authPasswordInput.value;
+function init() {
+  setAuthTab("signin");
+  syncScreenState();
+  bindEvents();
+  initAuth();
+}
+
+function bindEvents() {
+  authTabSignIn?.addEventListener("click", () => setAuthTab("signin"));
+  authTabSignUp?.addEventListener("click", () => setAuthTab("signup"));
+
+  signInButton?.addEventListener("click", onSignIn);
+  signUpButton?.addEventListener("click", onSignUp);
+  signOutButton?.addEventListener("click", onSignOut);
+
+  signInEmailInput?.addEventListener("keydown", onSignInEnter);
+  signInPasswordInput?.addEventListener("keydown", onSignInEnter);
+  signUpEmailInput?.addEventListener("keydown", onSignUpEnter);
+  signUpPasswordInput?.addEventListener("keydown", onSignUpEnter);
+  signUpConfirmPasswordInput?.addEventListener("keydown", onSignUpEnter);
+
+  documentInput?.addEventListener("change", onDocumentsSelected);
+  analyzeButton?.addEventListener("click", onAnalyze);
+  clearButton?.addEventListener("click", onClear);
+}
+
+function onSignInEnter(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    onSignIn();
+  }
+}
+
+function onSignUpEnter(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    onSignUp();
+  }
+}
+
+function setAuthTab(tab) {
+  const isSignIn = tab === "signin";
+
+  authTabSignIn?.classList.toggle("is-active", isSignIn);
+  authTabSignUp?.classList.toggle("is-active", !isSignIn);
+  authTabSignIn?.setAttribute("aria-selected", isSignIn ? "true" : "false");
+  authTabSignUp?.setAttribute("aria-selected", isSignIn ? "false" : "true");
+
+  signInPane?.classList.toggle("is-active", isSignIn);
+  signUpPane?.classList.toggle("is-active", !isSignIn);
+}
+
+function setCurrentUser(user) {
+  appState.currentUser = user;
+  syncScreenState();
+}
+
+function syncScreenState() {
+  if (!landingScreen || !workspaceScreen) return;
+
+  if (appState.currentUser) {
+    landingScreen.classList.remove("is-active");
+    workspaceScreen.classList.add("is-active");
+  } else {
+    workspaceScreen.classList.remove("is-active");
+    landingScreen.classList.add("is-active");
+  }
+
+  updateUserBadge();
+}
+
+async function initAuth() {
+  if (!supabaseClient) {
+    setAuthMessage("Authentication is unavailable right now. Please reload and try again.", true);
+    return;
+  }
+
+  try {
+    const {
+      data: { session },
+    } = await supabaseClient.auth.getSession();
+
+    const user = session?.user || null;
+    if (user) {
+      if (isEmailVerified(user)) {
+        setCurrentUser({ id: user.id, email: user.email || "" });
+      } else {
+        await supabaseClient.auth.signOut();
+        setCurrentUser(null);
+        setAuthMessage("Verify your email first, then sign in.", true);
+      }
+    }
+  } catch {
+    setAuthMessage("Could not restore session. Please sign in.", true);
+  }
+
+  supabaseClient.auth.onAuthStateChange(async (_event, sessionData) => {
+    const user = sessionData?.user || null;
+
+    if (!user) {
+      setCurrentUser(null);
+      return;
+    }
+
+    if (!isEmailVerified(user)) {
+      await supabaseClient.auth.signOut();
+      setCurrentUser(null);
+      setAuthMessage("Email verification required. Check your inbox and then sign in.", true);
+      return;
+    }
+
+    setCurrentUser({ id: user.id, email: user.email || "" });
+  });
+}
+
+async function onSignIn() {
+  const email = signInEmailInput?.value.trim() || "";
+  const password = signInPasswordInput?.value || "";
 
   if (!validCredentials(email, password)) return;
   if (!supabaseClient) {
-    setAuthMessage("Supabase client failed to load.", true);
+    setAuthMessage("Authentication service unavailable. Try again in a moment.", true);
     return;
   }
 
   setAuthMessage("Signing in...");
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   if (error) {
     setAuthMessage(error.message, true);
     return;
   }
 
-  handleAuthSuccess(data.user);
-  setAuthMessage("Sign-in successful.");
-});
+  if (!isEmailVerified(data?.user)) {
+    await supabaseClient.auth.signOut();
+    setAuthMessage("Email not verified. Open your verification email, then sign in again.", true);
+    return;
+  }
 
-signUpButton.addEventListener("click", async () => {
-  const email = authEmailInput.value.trim();
-  const password = authPasswordInput.value;
+  setCurrentUser({ id: data.user.id, email: data.user.email || email });
+  setAuthMessage("Sign-in successful.");
+}
+
+async function onSignUp() {
+  const email = signUpEmailInput?.value.trim() || "";
+  const password = signUpPasswordInput?.value || "";
+  const confirm = signUpConfirmPasswordInput?.value || "";
 
   if (!validCredentials(email, password)) return;
+  if (password !== confirm) {
+    setAuthMessage("Passwords do not match.", true);
+    return;
+  }
   if (!supabaseClient) {
-    setAuthMessage("Supabase client failed to load.", true);
+    setAuthMessage("Authentication service unavailable. Try again in a moment.", true);
     return;
   }
 
   setAuthMessage("Creating account...");
 
-  const { data, error } = await supabaseClient.auth.signUp({
+  const { error } = await supabaseClient.auth.signUp({
     email,
     password,
+    options: {
+      emailRedirectTo: window.location.origin,
+    },
   });
 
   if (error) {
@@ -93,24 +228,22 @@ signUpButton.addEventListener("click", async () => {
     return;
   }
 
-  if (data.user) {
-    setAuthMessage("Account created. If email confirmation is required, verify email then sign in.");
-  } else {
-    setAuthMessage("Account request submitted. Complete verification and sign in.");
+  setAuthMessage("Account created. Check your email for verification, then use Sign In.");
+  setAuthTab("signin");
+  if (signInEmailInput) signInEmailInput.value = email;
+  if (signInPasswordInput) signInPasswordInput.value = "";
+}
+
+async function onSignOut() {
+  if (supabaseClient) {
+    await supabaseClient.auth.signOut();
   }
-});
 
-signOutButton.addEventListener("click", async () => {
-  if (!supabaseClient) return;
-  await supabaseClient.auth.signOut();
-  appState.currentUser = null;
-  updateUserBadge();
-  workspaceScreen.classList.remove("is-active");
-  landingScreen.classList.add("is-active");
+  setCurrentUser(null);
   setAuthMessage("Signed out.");
-});
+}
 
-documentInput.addEventListener("change", async (event) => {
+async function onDocumentsSelected(event) {
   const files = Array.from(event.target.files || []);
 
   if (!files.length) {
@@ -127,7 +260,7 @@ documentInput.addEventListener("change", async (event) => {
   appState.filesParsed = files.length;
   appState.extractedDebt = pickLikelyDebt(amounts);
   appState.extractedRate = average(rates);
-  appState.foundTerms = unique(terms).slice(0, 6);
+  appState.foundTerms = unique(terms).slice(0, 8);
   appState.detectedStatus = detectStatusFromTerms(appState.foundTerms);
 
   if (!debtAmountInput.value && appState.extractedDebt > 0) {
@@ -141,19 +274,19 @@ documentInput.addEventListener("change", async (event) => {
   metricFiles.textContent = String(appState.filesParsed);
   uploadMessage.textContent = `Parsed ${files.length} file(s). Review extracted values before analyzing.`;
   renderDetectedTerms(appState.foundTerms);
-});
+}
 
-analyzeButton.addEventListener("click", async () => {
+async function onAnalyze() {
   if (!appState.currentUser) {
-    uploadMessage.textContent = "Please sign in before analyzing debt.";
-    workspaceScreen.classList.remove("is-active");
+    setAuthMessage("Please sign in before running analysis.", true);
     landingScreen.classList.add("is-active");
+    workspaceScreen.classList.remove("is-active");
     return;
   }
 
   const principal = toNumber(debtAmountInput.value) || appState.extractedDebt;
   const annualRate = toNumber(interestRateInput.value) || appState.extractedRate || 6.0;
-  const address = addressInput.value.trim();
+  const address = (addressInput?.value || "").trim();
 
   if (principal <= 0) {
     uploadMessage.textContent = "Add a valid debt amount or upload records with a debt value.";
@@ -191,9 +324,9 @@ analyzeButton.addEventListener("click", async () => {
     files_parsed: appState.filesParsed,
     detected_terms: appState.foundTerms.join(", "),
   });
-});
+}
 
-clearButton.addEventListener("click", () => {
+function onClear() {
   documentInput.value = "";
   debtAmountInput.value = "";
   interestRateInput.value = "";
@@ -211,38 +344,6 @@ clearButton.addEventListener("click", () => {
   forecastBars.innerHTML = "";
   resolutionList.innerHTML = "<li>Upload records and run analysis to get personalized options.</li>";
   uploadMessage.textContent = "Information cleared.";
-});
-
-async function initAuth() {
-  if (!supabaseClient) {
-    setAuthMessage("Supabase script unavailable. Auth is disabled.", true);
-    return;
-  }
-
-  const {
-    data: { session },
-  } = await supabaseClient.auth.getSession();
-
-  if (session?.user) {
-    handleAuthSuccess(session.user);
-  }
-
-  supabaseClient.auth.onAuthStateChange((_event, sessionData) => {
-    appState.currentUser = sessionData?.user || null;
-    updateUserBadge();
-
-    if (appState.currentUser) {
-      landingScreen.classList.remove("is-active");
-      workspaceScreen.classList.add("is-active");
-    }
-  });
-}
-
-function handleAuthSuccess(user) {
-  appState.currentUser = user;
-  updateUserBadge();
-  landingScreen.classList.remove("is-active");
-  workspaceScreen.classList.add("is-active");
 }
 
 function updateUserBadge() {
@@ -252,7 +353,10 @@ function updateUserBadge() {
 }
 
 async function saveAnalysisToSupabase(payload) {
-  if (!supabaseClient || !appState.currentUser) return;
+  if (!supabaseClient || !appState.currentUser) {
+    uploadMessage.textContent = "Analysis complete, but cloud save is unavailable.";
+    return;
+  }
 
   const row = {
     user_id: appState.currentUser.id,
@@ -263,11 +367,15 @@ async function saveAnalysisToSupabase(payload) {
   const { error } = await supabaseClient.from(SUPABASE_TABLE).insert([row]);
 
   if (error) {
-    uploadMessage.textContent = `Analysis ran, but save failed: ${error.message}`;
+    uploadMessage.textContent = `Analysis complete, but cloud save failed: ${error.message}`;
     return;
   }
 
-  uploadMessage.textContent = `Analysis complete and saved to Supabase table \"${SUPABASE_TABLE}\".`;
+  uploadMessage.textContent = `Analysis complete and saved to Supabase table "${SUPABASE_TABLE}".`;
+}
+
+function isEmailVerified(user) {
+  return Boolean(user?.email_confirmed_at || user?.confirmed_at);
 }
 
 function validCredentials(email, password) {
@@ -288,7 +396,7 @@ function validCredentials(email, password) {
 
 function setAuthMessage(message, isError = false) {
   authMessage.textContent = message;
-  authMessage.style.color = isError ? "#b54837" : "#385062";
+  authMessage.style.color = isError ? "#b54837" : "";
 }
 
 function clearDetectedData() {
@@ -317,9 +425,9 @@ function renderForecastTable(projections) {
     .join("");
 
   forecastTableWrap.innerHTML = `
-    <table class="table" aria-label="Debt forecast table">
+    <table class="table">
       <thead>
-        <tr><th>Time horizon</th><th>Projected balance</th></tr>
+        <tr><th>Time Horizon</th><th>Projected Balance</th></tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>
@@ -327,14 +435,15 @@ function renderForecastTable(projections) {
 }
 
 function renderForecastBars(projections) {
-  const max = Math.max(...projections.map((p) => p.amount));
+  const max = Math.max(...projections.map((item) => item.amount), 1);
+
   forecastBars.innerHTML = projections
     .map((item) => {
       const width = Math.max(8, Math.round((item.amount / max) * 100));
       return `
         <div class="bar-row">
-          <span>${item.year}Y</span>
-          <div class="bar" style="width:${width}%"></div>
+          <span>${item.year}y</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
           <strong>${money(item.amount)}</strong>
         </div>
       `;
@@ -343,173 +452,134 @@ function renderForecastBars(projections) {
 }
 
 function renderResolutionOptions({ principal, annualRate, address, status }) {
-  const stateCode = parseState(address);
-  const hasLocation = Boolean(stateCode);
-  const isHighDebt = principal >= 20000;
-  const isHighRate = annualRate >= 7.5;
+  const region = extractState(address);
+  const highRate = annualRate >= 8;
+  const highDebt = principal >= 20000;
 
-  const options = [
-    `Request a written debt validation statement and complete transaction history from your institution${hasLocation ? ` in ${stateCode}` : ""}.`,
-    isHighRate
-      ? "Prioritize refinance or consolidation comparisons to reduce interest acceleration before negotiating payment terms."
-      : "Request an interest freeze or reduced-rate hardship plan before setting repayment terms.",
-    isHighDebt
-      ? "Prepare for settlement negotiation with documentation of hardship, income limits, and a target lump-sum range."
-      : "Set a fixed payoff date and request fee waivers in exchange for automatic monthly payments.",
-    status.includes("Collections")
-      ? "Ask for proof of assignment/ownership of debt before agreeing to any collector payment arrangement."
-      : "Check whether your account can be restored to good standing through rehabilitation or administrative review.",
-    hasLocation
-      ? `Search ${stateCode} consumer protection resources and legal aid for education debt disputes and billing complaints.`
-      : "Add a full address so recommendations can include state-specific programs and legal aid resources.",
+  const items = [
+    `Request a full debt validation letter and account statement${region ? ` in ${region}` : ""}.`,
+    "Ask your institution for hardship options, fee waivers, and temporary payment relief.",
+    highRate
+      ? "Compare refinance and consolidation offers to reduce your effective APR."
+      : "Set up automatic monthly payments to avoid delinquency and additional penalties.",
+    highDebt
+      ? "Consult a nonprofit credit counselor to negotiate structured repayment terms."
+      : "Set a 12-24 month payoff plan with a fixed monthly budget.",
+    status.toLowerCase().includes("high")
+      ? "Prioritize this debt in your budget before discretionary spending."
+      : "Track this debt monthly and re-run projections after each payment.",
   ];
 
-  resolutionList.innerHTML = options.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  resolutionList.innerHTML = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
 
-function extractFileInsights(file) {
+async function extractFileInsights(file) {
+  const text = await readFileAsText(file);
+  return {
+    amountCandidates: extractAmountCandidates(text),
+    rateCandidates: extractRateCandidates(text),
+    statusTerms: extractStatusTerms(text),
+  };
+}
+
+function readFileAsText(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
-
-    reader.onload = () => {
-      const text = String(reader.result || "");
-      resolve({
-        amountCandidates: extractAmounts(text),
-        rateCandidates: extractRates(text),
-        statusTerms: extractStatusTerms(text),
-      });
-    };
-
-    reader.onerror = () => {
-      resolve({ amountCandidates: [], rateCandidates: [], statusTerms: [] });
-    };
-
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => resolve("");
     reader.readAsText(file);
   });
 }
 
-function extractAmounts(text) {
-  const values = [];
-  const pattern = /\$?\s?(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)/g;
+function extractAmountCandidates(text) {
+  const candidates = [];
+  const rx = /\$?\s?(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})|\d+(?:\.\d{1,2}))/g;
 
-  for (const match of text.matchAll(pattern)) {
+  for (const match of text.matchAll(rx)) {
     const value = Number(match[1].replace(/,/g, ""));
-    if (Number.isFinite(value) && value >= 100 && value <= 400000) {
-      values.push(value);
+    if (Number.isFinite(value) && value >= 100 && value <= 500000) {
+      candidates.push(value);
     }
   }
 
-  return values;
+  return candidates;
 }
 
-function extractRates(text) {
-  const values = [];
-  const pattern = /(\d{1,2}(?:\.\d{1,2})?)\s?%/g;
+function extractRateCandidates(text) {
+  const rates = [];
+  const rx = /(\d{1,2}(?:\.\d{1,2})?)\s?%/g;
 
-  for (const match of text.matchAll(pattern)) {
+  for (const match of text.matchAll(rx)) {
     const value = Number(match[1]);
-    if (Number.isFinite(value) && value > 0 && value <= 35) {
-      values.push(value);
+    if (Number.isFinite(value) && value > 0 && value <= 40) {
+      rates.push(value);
     }
   }
 
-  return values;
+  return rates;
 }
 
 function extractStatusTerms(text) {
   const lower = text.toLowerCase();
-  const dictionary = [
+  const keywords = [
     "past due",
     "delinquent",
-    "in collections",
-    "collection agency",
-    "charged off",
     "default",
+    "collections",
+    "charge off",
     "current",
-    "active",
+    "deferment",
+    "forbearance",
     "payment plan",
-    "hold",
+    "late fee",
+    "interest",
   ];
 
-  return dictionary.filter((term) => lower.includes(term));
+  return keywords.filter((key) => lower.includes(key));
 }
 
 function detectStatusFromTerms(terms) {
   const joined = terms.join(" ").toLowerCase();
-  if (joined.includes("in collections") || joined.includes("collection")) return "collections";
-  if (joined.includes("charged off") || joined.includes("default")) return "default";
-  if (joined.includes("past due") || joined.includes("delinquent")) return "past_due";
-  if (joined.includes("current") || joined.includes("active")) return "current";
+
+  if (/default|collections|charge off/.test(joined)) {
+    return "High risk";
+  }
+
+  if (/past due|delinquent|late fee/.test(joined)) {
+    return "Moderate pressure";
+  }
+
+  if (/current|payment plan|deferment|forbearance/.test(joined)) {
+    return "Managed";
+  }
+
   return "";
 }
 
 function deriveStatus(principal, detectedStatus) {
-  if (detectedStatus === "collections") {
-    return { label: "Collections Risk", className: "status-risk" };
+  if (detectedStatus === "High risk") {
+    return { label: "High risk", className: "status-risk" };
   }
 
-  if (detectedStatus === "default") {
-    return { label: "Default / Charge-Off Risk", className: "status-risk" };
-  }
-
-  if (detectedStatus === "past_due") {
-    return { label: "Past Due", className: "status-warning" };
-  }
-
-  if (detectedStatus === "current") {
-    return { label: "Current but Unpaid", className: "status-good" };
+  if (detectedStatus === "Moderate pressure") {
+    return { label: "Moderate pressure", className: "status-warning" };
   }
 
   if (principal >= 30000) {
-    return { label: "High Balance Risk", className: "status-risk" };
+    return { label: "High risk", className: "status-risk" };
   }
 
-  if (principal >= 12000) {
-    return { label: "Moderate Balance Risk", className: "status-warning" };
+  if (principal >= 10000) {
+    return { label: "Moderate pressure", className: "status-warning" };
   }
 
-  return { label: "Early-Stage Balance", className: "status-good" };
+  return { label: detectedStatus || "Low impact", className: "status-good" };
 }
 
-function pickLikelyDebt(values) {
-  if (!values.length) return 0;
-  const sorted = unique(values).sort((a, b) => b - a);
+function pickLikelyDebt(amounts) {
+  if (!amounts.length) return 0;
+  const sorted = [...amounts].sort((a, b) => b - a);
   return sorted[0];
-}
-
-function parseState(address) {
-  if (!address) return "";
-
-  const twoLetter = address.match(/\b([A-Z]{2})\b/);
-  if (twoLetter) return twoLetter[1];
-
-  const stateMap = {
-    alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR", california: "CA", colorado: "CO",
-    connecticut: "CT", delaware: "DE", florida: "FL", georgia: "GA", hawaii: "HI", idaho: "ID",
-    illinois: "IL", indiana: "IN", iowa: "IA", kansas: "KS", kentucky: "KY", louisiana: "LA",
-    maine: "ME", maryland: "MD", massachusetts: "MA", michigan: "MI", minnesota: "MN", mississippi: "MS",
-    missouri: "MO", montana: "MT", nebraska: "NE", nevada: "NV", "new hampshire": "NH", "new jersey": "NJ",
-    "new mexico": "NM", "new york": "NY", "north carolina": "NC", "north dakota": "ND", ohio: "OH",
-    oklahoma: "OK", oregon: "OR", pennsylvania: "PA", "rhode island": "RI", "south carolina": "SC",
-    "south dakota": "SD", tennessee: "TN", texas: "TX", utah: "UT", vermont: "VT", virginia: "VA",
-    washington: "WA", "west virginia": "WV", wisconsin: "WI", wyoming: "WY",
-  };
-
-  const lower = address.toLowerCase();
-  for (const [name, code] of Object.entries(stateMap)) {
-    if (lower.includes(name)) return code;
-  }
-
-  return "";
-}
-
-function average(values) {
-  if (!values.length) return 0;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
-function unique(values) {
-  return [...new Set(values)];
 }
 
 function toNumber(value) {
@@ -517,16 +587,44 @@ function toNumber(value) {
   return Number.isFinite(n) ? n : 0;
 }
 
+function average(values) {
+  if (!values.length) return 0;
+  return values.reduce((sum, v) => sum + v, 0) / values.length;
+}
+
+function unique(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
 function money(value) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 2,
-  }).format(value);
+  }).format(value || 0);
 }
 
-function escapeHtml(value) {
-  return String(value)
+function extractState(address) {
+  if (!address) return "";
+
+  const twoLetter = address.match(/\b([A-Z]{2})\b/);
+  if (twoLetter) return twoLetter[1];
+
+  const states = [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware",
+    "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
+    "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
+    "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York",
+    "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island",
+    "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+    "West Virginia", "Wisconsin", "Wyoming",
+  ];
+
+  return states.find((state) => address.toLowerCase().includes(state.toLowerCase())) || "";
+}
+
+function escapeHtml(text) {
+  return String(text)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")

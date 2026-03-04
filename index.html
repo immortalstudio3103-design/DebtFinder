@@ -31,21 +31,40 @@
           </ul>
         </article>
 
-        <article class="hero-panel" aria-label="Sign in to continue">
-          <h2>Sign In Required</h2>
-          <p class="muted auth-copy">You must sign in before continuing to your debt workspace.</p>
-          <label for="authEmail">Email</label>
-          <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+        <article class="hero-panel" aria-label="Sign in or sign up">
+          <h2>Access Your Debt Workspace</h2>
+          <p class="muted auth-copy">Create an account or sign in. Email verification is required before access.</p>
 
-          <label for="authPassword">Password</label>
-          <input id="authPassword" type="password" placeholder="Enter password" autocomplete="current-password" />
-
-          <div class="auth-actions">
-            <button id="signInButton" class="btn btn-primary" type="button">Sign In</button>
-            <button id="signUpButton" class="btn btn-outline" type="button">Sign Up</button>
+          <div class="auth-tabs" role="tablist" aria-label="Authentication tabs">
+            <button id="authTabSignIn" class="btn btn-outline auth-tab is-active" type="button" role="tab" aria-selected="true">Sign In</button>
+            <button id="authTabSignUp" class="btn btn-outline auth-tab" type="button" role="tab" aria-selected="false">Sign Up</button>
           </div>
+
+          <div id="signInPane" class="auth-pane is-active" role="tabpanel" aria-label="Sign in form">
+            <label for="signInEmail">Email</label>
+            <input id="signInEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+
+            <label for="signInPassword">Password</label>
+            <input id="signInPassword" type="password" placeholder="Enter password" autocomplete="current-password" />
+
+            <button id="signInButton" class="btn btn-primary auth-submit" type="button">Sign In</button>
+          </div>
+
+          <div id="signUpPane" class="auth-pane" role="tabpanel" aria-label="Sign up form">
+            <label for="signUpEmail">Email</label>
+            <input id="signUpEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+
+            <label for="signUpPassword">Password</label>
+            <input id="signUpPassword" type="password" placeholder="Create password (min 6 chars)" autocomplete="new-password" />
+
+            <label for="signUpConfirmPassword">Confirm Password</label>
+            <input id="signUpConfirmPassword" type="password" placeholder="Re-enter password" autocomplete="new-password" />
+
+            <button id="signUpButton" class="btn btn-primary auth-submit" type="button">Create Account</button>
+          </div>
+
           <p id="authMessage" class="note" aria-live="polite"></p>
-          <p class="note">New account: use Sign Up first, then Sign In.</p>
+          <p class="note">After sign up, verify your email link first, then sign in to enter the main page.</p>
         </article>
       </div>
     </section>
