@@ -18,7 +18,7 @@
     <div class="bg-orb bg-orb--left" aria-hidden="true"></div>
     <div class="bg-orb bg-orb--right" aria-hidden="true"></div>
     <main class="shell">
-      <section id="landingScreen" class="panel panel--active">
+      <section id="landingView" class="panel panel--active">
         <header class="hero">
           <p class="kicker">DebtPath</p>
           <h1>Understand your unpaid college debt before it grows.</h1>
@@ -47,7 +47,7 @@
         </section>
 
         <section id="signinTab" class="tab-panel" role="tabpanel" aria-hidden="true">
-          <form id="signInForm" class="stack">
+          <form id="loginForm" class="stack">
             <label>
               Email
               <input id="email" type="email" required placeholder="you@example.com" />
@@ -56,40 +56,31 @@
               Password
               <input id="password" type="password" minlength="8" required placeholder="Minimum 8 characters" />
             </label>
-            <label>
-              Supabase Anon Key
-              <input
-                id="supabaseAnonKey"
-                type="password"
-                required
-                placeholder="Paste your Supabase anon public key"
-              />
-            </label>
             <button type="submit" class="btn btn--primary">Continue to Debt Workspace</button>
-            <p id="authMessage" class="hint" aria-live="polite"></p>
+            <p id="loginMessage" class="hint" aria-live="polite"></p>
           </form>
         </section>
       </section>
 
-      <section id="workspaceScreen" class="panel">
+      <section id="dashboardView" class="panel" style="display:none;">
         <header class="workspace-head">
           <h2>Your Debt Workspace</h2>
           <p>Upload records, add your information, run analysis, and review your options.</p>
-          <p id="dbStatus" class="hint">Database status: not connected.</p>
+          <p id="syncMessage" class="hint">Database status: not connected.</p>
         </header>
 
         <form id="debtForm" class="grid">
           <div class="card">
             <h3>1) Upload Documents</h3>
             <p class="hint">Best results with text-based files (.txt or .csv).</p>
-            <input id="records" type="file" accept=".txt,.csv,.pdf,.doc,.docx" multiple />
+            <input id="fileUpload" type="file" accept=".txt,.csv,.pdf,.doc,.docx" multiple />
           </div>
 
           <div class="card">
             <h3>2) Debt Inputs</h3>
             <label>
               Current debt amount ($)
-              <input id="currentDebt" type="number" min="0" step="0.01" placeholder="e.g. 18500" />
+              <input id="principal" type="number" min="0" step="0.01" placeholder="e.g. 18500" />
             </label>
             <label>
               Annual interest rate (%)
@@ -97,7 +88,7 @@
             </label>
             <label>
               Months past due
-              <input id="monthsPastDue" type="number" min="0" step="1" placeholder="e.g. 4" />
+              <input id="monthsLate" type="number" min="0" step="1" placeholder="e.g. 4" />
             </label>
           </div>
 
@@ -123,28 +114,35 @@
 
           <div class="actions">
             <button type="submit" class="btn btn--primary">Analyze Debt</button>
-            <button id="clearButton" type="button" class="btn btn--ghost">Clear Information</button>
+            <button id="clearBtn" type="button" class="btn btn--ghost">Clear Information</button>
           </div>
         </form>
 
-        <section id="results" class="results" aria-live="polite">
+        <section id="results" class="results hidden" aria-live="polite">
           <article class="result-card">
             <h3>Current Status</h3>
-            <p id="statusText">Run analysis to view debt status.</p>
+            <p id="statusResult">Run analysis to view debt status.</p>
           </article>
 
           <article class="result-card">
             <h3>Debt Breakdown</h3>
-            <p id="breakdownText">No analysis yet.</p>
+            <div>
+              <p>Principal: <span id="principalResult">$0.00</span></p>
+              <p>Accrued Interest: <span id="interestResult">$0.00</span></p>
+              <p>Total Debt: <span id="totalResult">$0.00</span></p>
+            </div>
           </article>
 
           <article class="result-card">
             <h3>Future Projection</h3>
-            <p id="projectionText">No projection yet.</p>
+            <p>6 months: <span id="sixMonthResult">$0.00</span></p>
+            <p>12 months: <span id="twelveMonthResult">$0.00</span></p>
+            <p>24 months: <span id="twentyFourMonthResult">$0.00</span></p>
           </article>
 
           <article class="result-card">
             <h3>Resolution Options</h3>
+            <p id="locationSummary"></p>
             <ul id="optionsList" class="option-list">
               <li>Add your data and run analysis to generate options.</li>
             </ul>
@@ -153,7 +151,9 @@
 
         <section class="history">
           <h3>Saved Records (from Supabase)</h3>
-          <ul id="historyList" class="option-list">
+          <p id="recordsSummary">Click "Load Saved Records" to read entries from Supabase.</p>
+          <button id="loadRecordsBtn" class="btn btn--secondary">Load Saved Records</button>
+          <ul id="savedRecordsList" class="option-list">
             <li>No records loaded yet.</li>
           </ul>
         </section>
