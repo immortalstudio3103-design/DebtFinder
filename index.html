@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debt Resolution Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="app-container">
+        <section id="auth-section" class="card active">
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Sign in to access your financial tracker.</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="name@example.com">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="primary-btn">Sign In</button>
+            </form>
+        </section>
+
+        <section id="dashboard-section" class="hidden">
+            <header class="dashboard-header">
+                <h2>Your Financial Overview</h2>
+                <button id="clear-btn" class="text-btn">Clear All Data</button>
+            </header>
+
+            <div class="card fade-in">
+                <h3>1. Upload Documentation</h3>
+                <p class="subtitle">Upload college billing statements or loan documents.</p>
+                <div class="upload-area" id="drop-zone">
+                    <input type="file" id="file-upload" accept=".pdf,.png,.jpg" hidden>
+                    <label for="file-upload" class="upload-label">
+                        <span class="upload-icon">📄</span>
+                        <span>Click to upload or drag and drop</span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="analysis-container" class="hidden">
+                <div class="grid-layout">
+                    <div class="card status-card">
+                        <h3>Current Debt Status</h3>
+                        <div class="data-point">
+                            <span class="label">Principal Found:</span>
+                            <span class="value" id="principal-val">$0.00</span>
+                        </div>
+                        <div class="data-point">
+                            <span class="label">Status:</span>
+                            <span class="badge warning">Action Required</span>
+                        </div>
+                    </div>
+
+                    <div class="card prediction-card">
+                        <h3>10-Year Prediction</h3>
+                        <p class="subtitle">Estimated trajectory without intervention.</p>
+                        <div class="data-point">
+                            <span class="label">Projected Total:</span>
+                            <span class="value highlight" id="prediction-val">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mitigation-card">
+                    <h3>2. Explore Solutions</h3>
+                    <p class="subtitle">Enter your current address to scan for local, state, or institutional relief programs.</p>
+                    <form id="address-form" class="inline-form">
+                        <input type="text" id="address" placeholder="123 Main St, City, State, ZIP" required>
+                        <button type="submit" class="secondary-btn">Analyze Options</button>
+                    </form>
+                    <div id="solutions-output" class="hidden">
+                        <ul class="solution-list" id="solution-list"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>
