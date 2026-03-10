@@ -46,7 +46,7 @@ let analyzedInterest = 0;
 const SUPPORTED_EXTENSIONS = [".txt", ".csv", ".json", ".md"];
 
 const SUPABASE_URL = "https://pavuonaxerlpukbepcqs.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhdnVvbmF4ZXJscHVrYmVwY3FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxMjk0MjcsImV4cCI6MjA4NzcwNTQyN30.w1jyeDDQddkW6dDDcLaOBhmCO1qh_3qh1J4a02bJNDg";
+const SUPABASE_ANON_KEY = "sb_publishable_uaZGfYFOdXp4neAxWAqIig_FDO1oEYF";
 
 const isSupabaseConfigured =
   SUPABASE_URL.startsWith("http") &&
