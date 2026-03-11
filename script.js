@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDebt = 0;
 
     // Handle Login
-    loginForm.addEventListener('submit', (e) => {
+   loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         // Simulating successful authentication
         authSection.classList.remove('active');
