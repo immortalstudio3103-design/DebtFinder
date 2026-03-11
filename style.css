@@ -1,275 +1,130 @@
 :root {
-   --bg-900: #020817;
-    --bg-800: #08142d;
-    --surface-900: rgba(5, 16, 38, 0.9);
-    --surface-800: rgba(9, 27, 59, 0.8);
-    --surface-700: rgba(14, 38, 79, 0.7);
-    --stroke: rgba(124, 165, 255, 0.22);
-    --stroke-strong: rgba(120, 181, 255, 0.45);
-    --text-primary: #eef4ff;
-    --text-secondary: #9fb3d9;
-    --text-muted: #7e94be;
-    --accent: #4194ff;
-    --accent-bright: #58bbff;
-    --danger: #ff8aa7;
-    --input-bg: #dde5f2;
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+    --primary: #2563eb;
+    --success: #059669;
+    --danger: #dc2626;
+    --bg: #f8fafc;
+    --text: #1e293b;
+    --card: #ffffff;
 }
 
 body {
-    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-    min-height: 100vh;
-    color: var(--text-primary);
-    background:
-        radial-gradient(circle at 15% 15%, rgba(63, 131, 248, 0.22), transparent 42%),
-        radial-gradient(circle at 85% 10%, rgba(31, 92, 230, 0.2), transparent 34%),
-        repeating-linear-gradient(120deg, rgba(111, 157, 255, 0.07) 0 2px, transparent 2px 38px),
-        linear-gradient(160deg, #0b1f46 0%, #07142f 32%, #020817 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.hidden { display: none !important; }
+
+/* Auth Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: clamp(1rem, 3vw, 2rem);
+    z-index: 1000;
 }
 
-.app-container {
-    width: min(1100px, 100%);
-    border: 1px solid var(--stroke);
-    border-radius: 2rem;
-    background:
-        linear-gradient(128deg, rgba(148, 189, 255, 0.08) 8%, transparent 8% 52%, rgba(92, 152, 255, 0.12) 52% 56%, transparent 56%),
-        linear-gradient(160deg, var(--surface-900), rgba(0, 9, 27, 0.95));
-    box-shadow:
-        inset 0 1px 0 rgba(146, 187, 255, 0.2),
-        0 35px 80px rgba(0, 0, 0, 0.55);
-    padding: clamp(1.25rem, 3.5vw, 2.6rem);
-}
-
-
-.card {
-    border-radius: 1.35rem;
-    background: linear-gradient(170deg, rgba(16, 41, 85, 0.62), rgba(4, 15, 37, 0.86));
-    border: 1px solid rgba(138, 177, 255, 0.2);
-    box-shadow: inset 0 1px 0 rgba(169, 201, 255, 0.1);
-    padding: clamp(1.2rem, 2.4vw, 1.9rem);
-}
-
-#auth-section {
-    max-width: 580px;
-}
-
-
-h2 {
-    font-family: "Space Grotesk", "Inter", sans-serif;
-    font-size: clamp(2.1rem, 4.8vw, 4rem);
-    line-height: 1.05;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    margin-bottom: 0.75rem;
-    text-wrap: balance;
-}
-
-h3 {
-    color: #63b8ff;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.83rem;
-    margin-bottom: 0.85rem;
-}
-
-.subtitle {
-    color: var(--text-secondary);
-    font-size: clamp(1rem, 1.5vw, 1.3rem);
-    max-width: 54ch;
-    margin-bottom: 1.65rem;
-}
-
-.input-group {
-    margin-bottom: 1rem;
-}
-
-label {
-    display: block;
-    font-size: 1rem;
-    color: #d7e4ff;
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-}
-
-input[type="email"],
-input[type="password"],
-input[type="text"] {
+.auth-card {
+    background: var(--card);
+    padding: 2.5rem;
+    border-radius: 12px;
     width: 100%;
-    border: 1px solid rgba(123, 169, 255, 0.3);
-    border-radius: 0.85rem;
-    background: var(--input-bg);
-    color: #07152e;
-    font-size: 1.28rem;
-    padding: 0.86rem 1rem;
-}
-
-input::placeholder {
-    color: #607295;
-}
-
-input:focus {
-    outline: none;
-    border-color: var(--accent-bright);
-    box-shadow: 0 0 0 3px rgba(88, 187, 255, 0.25);
-}
-
-button {
-    border: none;
-    cursor: pointer;
-    font: inherit;
-}
-
-
-.primary-btn {
-    width: 100%;
-    margin-top: 0.9rem;
-    padding: 0.92rem 1.2rem;
-    border-radius: 0.9rem;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: white;
-    background: linear-gradient(102deg, #2f6ff2, var(--accent-bright));
-    box-shadow: 0 10px 30px rgba(56, 132, 255, 0.38);
-}
-
-.primary-btn:hover {
-    filter: brightness(1.08);
-}
-
-.secondary-btn {
-    border-radius: 999px;
-    border: 1px solid var(--stroke-strong);
-    background: linear-gradient(180deg, rgba(65, 138, 255, 0.28), rgba(35, 79, 161, 0.35));
-    color: #e7f1ff;
-    font-weight: 700;
-    padding: 0.75rem 1.1rem;
-    white-space: nowrap;
-}
-
-.text-btn {
-    background: transparent;
-    color: var(--text-muted);
-}
-
-.dashboard-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.9rem;
-}
-
-.auth-toggles {
-    display: flex;
-    gap: 0.75rem;
-}
-
-.upload-area {
-    margin-top: 0.8rem;
-    border-radius: 1rem;
-    border: 1px dashed rgba(130, 178, 255, 0.45);
-    background: rgba(112, 170, 255, 0.07);
-    min-height: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    max-width: 400px;
     text-align: center;
 }
 
-.upload-label {
-    color: var(--text-secondary);
-    display: grid;
-    gap: 0.45rem;
+/* Layout */
+main {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 0 1rem;
 }
 
-.grid-layout {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
-    margin: 1rem 0;
-}
-}
-
-.data-point {
+header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 0.75rem;
-    border-top: 1px solid rgba(133, 171, 244, 0.24);
-    padding-top: 0.85rem;
-    margin-top: 0.85rem;
-    color: var(--text-secondary);
-
-
-.value {
-    color: var(--text-primary);
-    font-weight: 700;
-    color: var(--text-primary);
+    margin-bottom: 2rem;
 }
 
-.highlight {
-    color: #7bc4ff;
-    text-shadow: 0 0 16px rgba(102, 188, 255, 0.36);
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
 }
 
-.badge.warning {
-    padding: 0.25rem 0.62rem;
-    border-radius: 999px;
-    background: rgba(255, 142, 167, 0.18);
+.span-two { grid-column: span 2; }
+
+/* Components */
+.card {
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+
+.upload-zone {
+    border: 2px dashed #cbd5e1;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.upload-zone:hover { border-color: var(--primary); background: #eff6ff; }
+
+input[type="text"], input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 0.5rem 0 1.25rem 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #94a3b8;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.projection-box {
+    font-size: 2rem;
+    font-weight: bold;
     color: var(--danger);
-    border: 1px solid rgba(255, 170, 189, 0.4);
+    margin-top: 1rem;
+}
+
+.status-tag {
+    background: #e2e8f0;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
     font-size: 0.85rem;
 }
 
-.inline-form {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.inline-form input {
-    flex: 1 1 280px;
-}
-
-.solution-list {
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
     margin-top: 1rem;
-    padding-left: 1.1rem;
-    color: var(--text-secondary);
-}
-
-.hidden {
-    display: none !important;
-}
-
-.active {
-    display: block;
-}
-
-@media (max-width: 700px) {
-    .app-container {
-        border-radius: 1.3rem;
-        padding: 1rem;
-    }
-
-    .card {
-        padding: 1rem;
-    }
-
-    .subtitle {
-        font-size: 1rem;
-    }
-
-    input[type="email"],
-    input[type="password"],
-    input[type="text"] {
-        font-size: 1.05rem;
-    }
 }
