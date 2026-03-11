@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Supabase configuration
+    const SUPABASE_URL = 'https://pavuonaxerlpukbepcqs.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_uaZGfYFOdXp4neAxWAqIig_FDO1oEYF';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
     // DOM Elements
     const loginForm = document.getElementById('login-form');
     const authSection = document.getElementById('auth-section');
