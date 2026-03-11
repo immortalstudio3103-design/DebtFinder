@@ -23,7 +23,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Login
    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        // Simulating successful authentication
+       
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        const { error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) {
+            alert(`Login failed: ${error.message}`);
+            return;
+        }
+       
         authSection.classList.remove('active');
         authSection.classList.add('hidden');
         dashboardSection.classList.remove('hidden');
