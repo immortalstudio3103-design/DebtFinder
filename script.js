@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function simulateDocumentAnalysis() {
         // Mock data extraction that would normally happen via backend OCR/Parsing
-        currentDebt = 24500.00; 
+        currentDebt = 24500.00;
         const interestRate = 0.05; // 5% average rate
         const years = 10;
         
@@ -60,9 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const projectedDebt = currentDebt * Math.pow((1 + interestRate), years);
 
         // Update UI
-        principalVal.innerText = `$${currentDebt.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-        predictionVal.innerText = `$${projectedDebt.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-        
+        principalVal.innerText = `$${currentDebt.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        predictionVal.innerText = `$${projectedDebt.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
         analysisContainer.classList.remove('hidden');
     }
 
