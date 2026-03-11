@@ -1,102 +1,64 @@
+// Initialize Supabase
+const supabaseUrl = 'https://pavuonaxerlpukbepcqs.supabase.co';
+const supabaseKey = 'sb_publishable_uaZGfYFOdXp4neAxWAqIig_FDO1oEYF';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Supabase configuration
-    const SUPABASE_URL = 'https://pavuonaxerlpukbepcqs.supabase.co';
-    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_uaZGfYFOdXp4neAxWAqIig_FDO1oEYF';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-
-    // DOM Elements
+    const authOverlay = document.getElementById('auth-container');
     const loginForm = document.getElementById('login-form');
-    const authSection = document.getElementById('auth-section');
-    const dashboardSection = document.getElementById('dashboard-section');
-    const fileUpload = document.getElementById('file-upload');
-    const analysisContainer = document.getElementById('analysis-container');
-    const principalVal = document.getElementById('principal-val');
-    const predictionVal = document.getElementById('prediction-val');
-    const addressForm = document.getElementById('address-form');
-    const solutionsOutput = document.getElementById('solutions-output');
-    const solutionList = document.getElementById('solution-list');
-    const clearBtn = document.getElementById('clear-btn');
+    const mainContent = document.getElementById('main-content');
+    const returnBtn = document.getElementById('return-home');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const clearBtn = document.getElementById('clear-data');
 
-    // State Variables
-    let currentDebt = 0;
-
-    // Handle Login
-   loginForm.addEventListener('submit', async (e) => {
+    // Authentication Logic
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-       
-        const email = document.getElementById('email').value.trim();
+        const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-        const { error } = await supabaseClient.auth.signInWithPassword({
-            email,
-            password,
-        });
-
-        if (error) {
-            alert(`Login failed: ${error.message}`);
-            return;
-        }
-       
-        authSection.classList.remove('active');
-        authSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
-        dashboardSection.classList.add('active');
+        // In a real scenario, use: await supabase.auth.signInWithPassword({ email, password })
+        authOverlay.classList.add('hidden');
+        mainContent.classList.remove('hidden');
     });
 
-    // Handle File Upload (Simulated Parsing)
-    fileUpload.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            simulateDocumentAnalysis();
-        }
+    // Return to Landing Page Logic
+    returnBtn.addEventListener('click', () => {
+        mainContent.classList.add('hidden');
+        authOverlay.classList.remove('hidden');
+        // Reset form if needed
+        loginForm.reset();
     });
 
-    function simulateDocumentAnalysis() {
-        // Mock data extraction that would normally happen via backend OCR/Parsing
-        currentDebt = 24500.00;
-        const interestRate = 0.05; // 5% average rate
-        const years = 10;
+    // Debt Analysis Simulation
+    analyzeBtn.addEventListener('click', () => {
+        const principal = 25000; 
+        const annualRate = 0.05;
         
-        // Compound interest calculation
-        const projectedDebt = currentDebt * Math.pow((1 + interestRate), years);
+        document.getElementById('principal-val').innerText = `$${principal.toLocaleString()}`;
+        document.getElementById('status-tag').innerText = 'Active / Unpaid';
+        
+        const prediction = principal * Math.pow((1 + annualRate / 12), 12);
+        document.getElementById('projection-val').innerText = `$${prediction.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+        
+        displayResolutions(document.getElementById('address').value);
+    });
 
-        // Update UI
-        principalVal.innerText = `$${currentDebt.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-        predictionVal.innerText = `$${projectedDebt.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-
-        analysisContainer.classList.remove('hidden');
+    function displayResolutions(address) {
+        const container = document.getElementById('resolution-options');
+        container.innerHTML = `
+            <div class="card" style="border-left: 4px solid var(--success)">
+                <h4>Income-Driven Repayment</h4>
+                <p>Adjust monthly payments based on current earnings.</p>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--primary)">
+                <h4>Local Refinancing</h4>
+                <p>Check options available near ${address || 'your location'}.</p>
+            </div>
+        `;
     }
 
-    // Handle Address submission for Solutions
-    addressForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const addressInput = document.getElementById('address').value.toLowerCase();
-        solutionList.innerHTML = ''; // Reset list
-        
-        // Simulated algorithmic resolution options based on location/profile
-        const mockSolutions = [
-            "Income-Driven Repayment (IDR) Plan Transition",
-            "New York State Get on Your Feet Loan Forgiveness Program",
-            "SUNY Oswego Alumni Relief Grant Network"
-        ];
-
-        mockSolutions.forEach(solution => {
-            const li = document.createElement('li');
-            li.innerHTML = `<strong>Option:</strong> ${solution} <br><a href="#" style="font-size: 0.85rem; color: var(--accent);">Learn how to apply &rarr;</a>`;
-            solutionList.appendChild(li);
-        });
-
-        solutionsOutput.classList.remove('hidden');
-    });
-
-    // Handle Clear Data
     clearBtn.addEventListener('click', () => {
-        // Reset state and UI
-        currentDebt = 0;
-        fileUpload.value = '';
-        analysisContainer.classList.add('hidden');
-        solutionsOutput.classList.add('hidden');
-        document.getElementById('address').value = '';
-        principalVal.innerText = '$0.00';
-        predictionVal.innerText = '$0.00';
+        if(confirm("Clear all data?")) location.reload();
     });
 });
